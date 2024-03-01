@@ -21,22 +21,27 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
+import InputBase from '@mui/material/InputBase';
+import Divider from '@mui/material/Divider';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import DirectionsIcon from '@mui/icons-material/Directions';
 
-function createData(id, name, calories, fat, carbs, protein) {
+function createData(id, name, email, lastDate, activeTimes, dateToChoose) {
     return {
         id,
         name,
-        calories,
-        fat,
-        carbs,
-        protein,
+        email,
+        lastDate,
+        activeTimes,
+        dateToChoose,
     };
 }
 
 const rows = [
-    createData(1, 'Cupcake', 305, 3.7, 67, 4.3),
-    createData(2, 'Donut', 452, 25.0, 51, 4.9),
-    createData(3, 'Eclair', 262, 16.0, 24, 6.0),
+    createData(1, 'Cupcake', 'asaf@gmail.com', 3.7, 67, 4.3),
+    createData(2, 'Donut', 'asaf@gmail.com', 25.0, 51, 4.9),
+    createData(3, 'Eclair', 'asaf@gmail.com', 16.0, 24, 6.0),
     createData(4, 'Frozen yoghurt', 159, 6.0, 24, 4.0),
     createData(5, 'Gingerbread', 356, 16.0, 49, 3.9),
     createData(6, 'Honeycomb', 408, 3.2, 87, 6.5),
@@ -47,50 +52,6 @@ const rows = [
     createData(11, 'Marshmallow', 318, 0, 81, 2.0),
     createData(12, 'Nougat', 360, 19.0, 9, 37.0),
     createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData(8, 'Jelly Bean', 375, 0.0, 94, 0.0),
-    createData(9, 'KitKat', 518, 26.0, 65, 7.0),
-    createData(10, 'Lollipop', 392, 0.2, 98, 0.0),
-    createData(11, 'Marshmallow', 318, 0, 81, 2.0),
-    createData(12, 'Nougat', 360, 19.0, 9, 37.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData(8, 'Jelly Bean', 375, 0.0, 94, 0.0),
-    createData(9, 'KitKat', 518, 26.0, 65, 7.0),
-    createData(10, 'Lollipop', 392, 0.2, 98, 0.0),
-    createData(11, 'Marshmallow', 318, 0, 81, 2.0),
-    createData(12, 'Nougat', 360, 19.0, 9, 37.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData(8, 'Jelly Bean', 375, 0.0, 94, 0.0),
-    createData(9, 'KitKat', 518, 26.0, 65, 7.0),
-    createData(10, 'Lollipop', 392, 0.2, 98, 0.0),
-    createData(11, 'Marshmallow', 318, 0, 81, 2.0),
-    createData(12, 'Nougat', 360, 19.0, 9, 37.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData(8, 'Jelly Bean', 375, 0.0, 94, 0.0),
-    createData(9, 'KitKat', 518, 26.0, 65, 7.0),
-    createData(10, 'Lollipop', 392, 0.2, 98, 0.0),
-    createData(11, 'Marshmallow', 318, 0, 81, 2.0),
-    createData(12, 'Nougat', 360, 19.0, 9, 37.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-    createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -130,31 +91,31 @@ const headCells = [
         id: 'dateToChoose',
         numeric: false,
         disablePadding: true,
-        label: 'תאריך לבחירה',
+        label: 'Date to Choose',
     },
     {
-        id: 'activityTime',
+        id: 'activeTimes',
         numeric: true,
         disablePadding: false,
-        label: 'פעמים פעילות',
+        label: 'Active Times',
     },
     {
-        id: 'lateDate',
+        id: 'lastDate',
         numeric: true,
         disablePadding: false,
-        label: 'תאריך אחרון',
+        label: 'Last Date',
     },
     {
         id: 'email',
         numeric: true,
         disablePadding: false,
-        label: 'אימייל',
+        label: 'email',
     },
     {
         id: 'name',
         numeric: true,
         disablePadding: false,
-        label: 'שם מלא',
+        label: 'name',
     },
 ];
 
@@ -168,17 +129,7 @@ function EnhancedTableHead(props) {
     return (
         <TableHead>
             <TableRow>
-                <TableCell padding="checkbox">
-                    <Checkbox
-                        color="primary"
-                        indeterminate={numSelected > 0 && numSelected < rowCount}
-                        checked={rowCount > 0 && numSelected === rowCount}
-                        onChange={onSelectAllClick}
-                        inputProps={{
-                            'aria-label': 'select all desserts',
-                        }}
-                    />
-                </TableCell>
+
                 {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}
@@ -200,6 +151,17 @@ function EnhancedTableHead(props) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
+                <TableCell padding="checkbox">
+                    <Checkbox
+                        color="primary"
+                        indeterminate={numSelected > 0 && numSelected < rowCount}
+                        checked={rowCount > 0 && numSelected === rowCount}
+                        onChange={onSelectAllClick}
+                        inputProps={{
+                            'aria-label': 'select all desserts',
+                        }}
+                    />
+                </TableCell>
             </TableRow>
         </TableHead>
     );
@@ -248,7 +210,21 @@ function EnhancedTableToolbar(props) {
                 </Typography>
             )}
 
-            {numSelected > 0 ? (
+            <Paper
+                component="form"
+                sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
+            >
+                <InputBase
+                    sx={{ ml: 1, flex: 1 }}
+                    placeholder="Search"
+                    inputProps={{ 'aria-label': 'search google maps' }}
+                />
+                <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                    <SearchIcon />
+                </IconButton>
+
+            </Paper>
+            {/* {numSelected > 0 ? (
                 <Tooltip title="Delete">
                     <IconButton>
                         <DeleteIcon />
@@ -260,7 +236,7 @@ function EnhancedTableToolbar(props) {
                         <FilterListIcon />
                     </IconButton>
                 </Tooltip>
-            )}
+            )} */}
         </Toolbar>
     );
 }
@@ -275,7 +251,7 @@ export default function EnhancedTable() {
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -359,6 +335,7 @@ export default function EnhancedTable() {
                         />
                         <TableBody>
                             {visibleRows.map((row, index) => {
+                                console.log('fffffffffffffffffffffffffffffff', row);
                                 const isItemSelected = isSelected(row.id);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -373,6 +350,18 @@ export default function EnhancedTable() {
                                         selected={isItemSelected}
                                         sx={{ cursor: 'pointer' }}
                                     >
+                                        <TableCell
+                                            component="th"
+                                            id={labelId}
+                                            scope="row"
+                                            padding="none"
+                                        >
+                                            {row.dateToChoose}
+                                        </TableCell>
+                                        <TableCell align="right">{row.activeTimes}</TableCell>
+                                        <TableCell align="right">{row.lastDate}</TableCell>
+                                        <TableCell align="right">{row.email}</TableCell>
+                                        <TableCell align="right">{row.name}</TableCell>
                                         <TableCell padding="checkbox">
                                             <Checkbox
                                                 color="primary"
@@ -382,18 +371,6 @@ export default function EnhancedTable() {
                                                 }}
                                             />
                                         </TableCell>
-                                        <TableCell
-                                            component="th"
-                                            id={labelId}
-                                            scope="row"
-                                            padding="none"
-                                        >
-                                            {row.name}
-                                        </TableCell>
-                                        <TableCell align="right">{row.calories}</TableCell>
-                                        <TableCell align="right">{row.fat}</TableCell>
-                                        <TableCell align="right">{row.carbs}</TableCell>
-                                        <TableCell align="right">{row.protein}</TableCell>
                                     </TableRow>
                                 );
                             })}
@@ -409,6 +386,15 @@ export default function EnhancedTable() {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={rows.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
             </Paper>
         </Box>
     );
