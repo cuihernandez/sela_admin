@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { React, useState } from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import { makeStyles } from '@mui/styles';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import { Input } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import backgroundImage from '../assets/bg.png';
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -20,13 +21,12 @@ const useStyles = makeStyles({
     },
 });
 export default function SignIn() {
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
+
+    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
+    const handleSubmit = () => {
+        // event.preventDefault();
+        console.log('email:', email, 'password:', password);
     };
     const classes = useStyles();
     return (
@@ -58,7 +58,7 @@ export default function SignIn() {
                             הירשם
                         </Typography>
                         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                            <TextField
+                            {/* <TextField
                                 margin="normal"
                                 required
                                 fullWidth
@@ -67,6 +67,8 @@ export default function SignIn() {
                                 autoComplete="email"
                                 autoFocus
                                 placeholder='אימייל'
+                                value={email}
+                                onChange={setEmail}
                             />
                             <TextField
                                 margin="normal"
@@ -84,12 +86,38 @@ export default function SignIn() {
                                         border: "none",
                                     },
                                 }}
+                                value={password}
+                                onChange={setPassword}
+                            /> */}
+                            <Input
+                                margin="normal"
+                                required
+                                fullWidth
+                                autoComplete="current-password"
+                                placeholder='סיסמה'
+                                style={{ borderRadius: 30, backgroundColor: '#F1E6FF' }}
+                                variant="outlined"
+                                InputProps={{
+                                    style: {
+                                        border: "none",
+                                    },
+                                }}
+
+                                value={email}
+                                onChange={setEmail}
+                            />
+
+                            <Input
+                                placeholder='password'
+                                onChange={setPassword}
+                                value={password}
                             />
                             <Button
                                 type="submit"
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2 }}
+                                onClick={handleSubmit}
                             >
                                 החל מסנן
                             </Button>
