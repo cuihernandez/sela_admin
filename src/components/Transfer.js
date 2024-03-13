@@ -24,6 +24,7 @@ const Transfer = (props) => {
                 <Box sx={{
                     display: 'flex',
                     flowDirection: 'column',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: 1
                 }}>

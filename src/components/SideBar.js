@@ -4,46 +4,70 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import iconImage from '../assets/icon.png';
+import { Grid } from '@mui/material';
+import TableDonee from './Tables_donee';
+import TableDonor from './Tables_doner';
+import Edit from './Edit';
+import Donors from './Donors';
+import { Link } from 'react-router-dom';
+
 function RightAlignedContainer() {
     return (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-        }}>
-
+        <Grid item xs={2} sm={2} md={2} lg={2} xl={2} sx={{ bgcolor: 'white' }}>
             <Box
-                component="img"
                 sx={{
-                    width: 80,
-                    height: 80,
-                    marginTop: 2,
+                    height: 300, // Adjust the height as needed
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    p: 2,
                 }}
-                src={iconImage}
-                alt="Icon Image"
-            />
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                marginLeft: 12,
-                marginTop: 6
-            }}>
-                <List sx={{ width: '100%' }}>
-                    {['משתמשים', 'לקוחות', 'דאונרים'].map((text, index) => (
-                        <ListItem button key={text} sx={{
-                            '&:hover': {
-                                backgroundColor: 'linear-gradient(45deg, #F1E6FF, #F1E6FF)', // Custom hover color
-                                // Note: Linear gradient might not be directly supported for background color in hover state. Use a solid color for compatibility or adjust with a pseudo-class in CSS.
-                            },
-                        }}>
-                            <ListItemText primary={text} />
-                        </ListItem>
-                    ))}
-                </List>
-            </Box>
+            >
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                }}>
 
-        </Box>
+                    <Box
+                        component="img"
+                        sx={{
+                            width: 80,
+                            height: 80,
+                            marginTop: 2,
+                        }}
+                        src={iconImage}
+                        alt="Icon Image"
+                    />
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        marginLeft: 12,
+                        marginTop: 6
+                    }}>
+                        <List sx={{ width: '100%' }}>
+                            <ListItem button component={Link} to="/tabledonor" sx={ListItemStyle}>
+                                <ListItemText primary='DonorTable' />
+                            </ListItem>
+                            <ListItem button component={Link} to="/tabledonee" sx={ListItemStyle}>
+                                <ListItemText primary='DoneeTable' />
+                            </ListItem>
+                            <ListItem button component={Link} to="/edit" sx={ListItemStyle}>
+                                <ListItemText primary='Edit' />
+                            </ListItem>
+                        </List>
+                    </Box>
+
+                </Box>
+            </Box>
+        </Grid>
     );
 }
+
+const ListItemStyle = {
+    '&:hover': {
+        backgroundColor: 'linear-gradient(45deg, #F1E6FF, #F1E6FF)', // Change the background color on hover
+    },
+};
 
 export default RightAlignedContainer;

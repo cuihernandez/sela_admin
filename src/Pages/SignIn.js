@@ -29,6 +29,9 @@ export default function SignIn() {
         console.log('email:', email, 'password:', password);
     };
     const classes = useStyles();
+    if (localStorage.getItem("wagmi.store")) {
+        window.location.href = "/";
+    }
     return (
         <div className={classes.root}>
             <ThemeProvider theme={defaultTheme}>

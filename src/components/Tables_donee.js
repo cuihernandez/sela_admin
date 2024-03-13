@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -15,44 +16,97 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
-import Divider from '@mui/material/Divider';
-import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import DirectionsIcon from '@mui/icons-material/Directions';
 import Button from '@mui/material/Button';
 
-function createData(id, name, email, totalDonation, credit) {
-    return {
-        id,
-        name,
-        email,
-        totalDonation,
-        credit,
-    };
+import EditImage from '../assets/Edit_btn_icon.png';
+import { initializeApp } from 'firebase/app';
+
+import { collection, getFirestore, getDocs, query, where } from "firebase/firestore/lite";
+const firebaseConfig = {
+    apiKey: "AIzaSyD1HUcvmYv6rpgCIJHfHoYEhXCgEIbnSFQ",
+    authDomain: "sela-238dc.firebaseapp.com",
+    databaseURL: "https://sela-238dc-default-rtdb.firebaseio.com",
+    projectId: "sela-238dc",
+    storageBucket: "gs://sela-238dc.appspot.com",
+    messagingSenderId: "195049554939",
+    appId: "1:195049554939:android:178e412da41a791124815e"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+let rows = [];
+const dbLoad = () => {
+    const users = collection(db, 'transaction');
+    let arrays = [];
+    let idCounter = 0;
+    getDocs(users).then((querySnapshot) => {
+        const promises = [];
+        querySnapshot.forEach((doc) => {
+            promises.push(countPrayTimeAndAmount(doc.data().donorID, doc.data().doneeName).then((response) => {
+                let obj = {
+                    id: idCounter,
+                    // userId: doc.id,
+                    name: response.doneeName,
+                    email: response.doneeEmail,
+                    totalDonation: response.totalDonation,
+                    credit: response.totalDonation - response.prayTime * 0.2, // Use the response from fetchCountValueByUserID
+                };
+                arrays.push(obj);
+                idCounter++;
+            }));
+        });
+
+        Promise.all(promises).then(() => {
+            console.log('object is :', arrays);
+            rows = arrays;
+        });
+        return arrays;
+    }).catch((error) => {
+        console.error('Error getting documents: ', error);
+    });
 }
 
-const rows = [
-    createData(1, 'Cupcake', 'asaf@gmail.com', 3.7, 67),
-    createData(2, 'Donut', 'asaf@gmail.com', 25.0, 51),
-    createData(3, 'Eclair', 'asaf@gmail.com', 16.0, 24),
-    createData(4, 'Frozen yoghurt', 159, 6.0, 24),
-    createData(5, 'Gingerbread', 356, 16.0, 49),
-    createData(6, 'Honeycomb', 408, 3.2, 87),
-    createData(7, 'Ice cream sandwich', 237, 9.0, 37),
-    createData(8, 'Jelly Bean', 375, 0.0, 94),
-    createData(9, 'KitKat', 518, 26.0, 65),
-    createData(10, 'Lollipop', 392, 0.2, 98),
-    createData(11, 'Marshmallow', 318, 0, 81),
-    createData(12, 'Nougat', 360, 19.0, 9),
-    createData(13, 'Oreo', 437, 18.0, 63),
-];
+const countPrayTimeAndAmount = async (donorId, name) => {
+    const userDataRef = collection(db, 'transaction');
+    const q = query(userDataRef, where('donorID', '==', donorId), where('doneeName', '==', name));
+    try {
+        const querySnapshot = await getDocs(q);
+        let prayTime = 0;
+        let totalDonation = 0;
+        let doneeEmail = '';
+        let doneeName = '';
+        querySnapshot.forEach((doc) => {
+            const value = doc.data().transactionAmount;
+            doneeName = doc.data().doneeName;
+            doneeEmail = doc.data().doneeEmail;
+            totalDonation += value;
+            prayTime++;
+
+        });
+        return { doneeName, doneeEmail, prayTime, totalDonation };
+
+    }
+    catch {
+
+    }
+}
+// const rows = [
+//     createData(1, 'Cupcake', 'asaf@gmail.com', 3.7, 67),
+//     createData(2, 'Donut', 'asaf@gmail.com', 25.0, 51),
+//     createData(3, 'Eclair', 'asaf@gmail.com', 16.0, 24),
+//     createData(4, 'Frozen yoghurt', 159, 6.0, 24),
+//     createData(5, 'Gingerbread', 356, 16.0, 49),
+//     createData(6, 'Honeycomb', 408, 3.2, 87),
+//     createData(7, 'Ice cream sandwich', 237, 9.0, 37),
+//     createData(8, 'Jelly Bean', 375, 0.0, 94),
+//     createData(9, 'KitKat', 518, 26.0, 65),
+//     createData(10, 'Lollipop', 392, 0.2, 98),
+//     createData(11, 'Marshmallow', 318, 0, 81),
+//     createData(12, 'Nougat', 360, 19.0, 9),
+//     createData(13, 'Oreo', 437, 18.0, 63),
+// ];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -87,6 +141,12 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
+    {
+        id: 'edit',
+        numeric: true,
+        disablePadding: false,
+        label: 'Edit',
+    },
 
     {
         id: 'credit',
@@ -201,7 +261,7 @@ function EnhancedTableToolbar(props) {
                     id="tableTitle"
                     component="div"
                 >
-                    Nutrition
+                    Donee Information
                 </Typography>
             )}
 
@@ -309,6 +369,24 @@ export default function EnhancedTable() {
             ),
         [order, orderBy, page, rowsPerPage],
     );
+    dbLoad();
+
+    // const getResult2 = async () => {
+    //     try {
+
+    //         const donorID = "iDGV3WYZWcO9otGg5J3g";
+    //         const name = "Jerry";
+    //         const result = await countPrayTimeAndAmount(donorID, name);
+    //         console.log('donor pray to Jerry', result.prayTime, 'times and the amount of prayDonation is', result.totalDonation);
+
+    //     }
+
+    //     catch (error) {
+    //         console.error('Error is:', error);
+    //     }
+    // }
+    // Call the getResult function to execute fetchTotalDonation and get the return value
+
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -330,14 +408,12 @@ export default function EnhancedTable() {
                         />
                         <TableBody>
                             {visibleRows.map((row, index) => {
-                                console.log('fffffffffffffffffffffffffffffff', row);
                                 const isItemSelected = isSelected(row.id);
                                 const labelId = `enhanced-table-checkbox-${index}`;
 
                                 return (
                                     <TableRow
                                         hover
-                                        onClick={(event) => handleClick(event, row.id)}
                                         role="checkbox"
                                         aria-checked={isItemSelected}
                                         tabIndex={-1}
@@ -345,25 +421,25 @@ export default function EnhancedTable() {
                                         selected={isItemSelected}
                                         sx={{ cursor: 'pointer' }}
                                     >
-                                        <TableCell>
-                                            <Button>
-                                                haha
-                                            </Button>
-                                        </TableCell>
                                         <TableCell
                                             component="th"
                                             id={labelId}
                                             scope="row"
                                             padding="none"
+                                            align='right'
                                         >
-                                            {row.credit}
+                                            <Button>
+                                                <img src={EditImage} alt="edit" style={{ width: 15, height: 15 }} />
+                                            </Button>
                                         </TableCell>
+                                        <TableCell align="right">{row.credit}</TableCell>
                                         <TableCell align="right">{row.totalDonation}</TableCell>
                                         <TableCell align="right">{row.email}</TableCell>
                                         <TableCell align="right">{row.name}</TableCell>
                                         <TableCell padding="checkbox">
                                             <Checkbox
                                                 color="primary"
+                                                onChange={(event) => handleClick(event, row.id)}
                                                 checked={isItemSelected}
                                                 inputProps={{
                                                     'aria-labelledby': labelId,
