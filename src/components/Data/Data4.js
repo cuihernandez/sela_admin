@@ -12,8 +12,7 @@ import EditImage from '../../assets/Edit.png';
 import IconImage from '../../assets/splash_icon.png';
 import { useEditContext } from '../../EditContext';
 import { collection, getDocs } from "firebase/firestore/lite";
-import db from '../../firebase';
-
+import { db } from '../../firebase';
 const theme = createTheme({
     palette: {
         primary: {
@@ -32,7 +31,7 @@ const getColumnData = async (donorID) => {
     const querySnapshot = await getDocs(users);
     let documentData = ''; // Initialize as null for clarity
     querySnapshot.forEach((doc) => {
-        if (doc.id == donorID) { // Use === for comparison
+        if (doc.id === donorID) { // Use === for comparison
             documentData = doc.data();
 
         }
@@ -71,7 +70,6 @@ const Data4 = () => {
     useEffect(() => {
         initialize();
     }, [editData]);
-
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -114,7 +112,7 @@ const Data4 = () => {
                                 padding: 3,
                             }}>
                                 <Typography variant='body5' color="primary" fontWeight={'bold'} textAlign={'right'}>
-                                    ימים פעילים
+                                    מספר תפילות
                                 </Typography>
                                 <Typography variant='h4' color="primary" fontWeight={'bold'} textAlign={'right'} marginTop={3}>
                                     {editData.totalDonation}
@@ -145,7 +143,7 @@ const Data4 = () => {
                                         }}>
                                             <Typography variant='body4' color="primary" textAlign={'right'} sx={{
                                             }}>
-                                                Name
+                                                שם פרטי
                                             </Typography>
                                         </Box>
                                         <Input
@@ -161,7 +159,7 @@ const Data4 = () => {
                                         }}>
                                             <Typography variant='body4' color="primary" textAlign={'right'} sx={{
                                             }}>
-                                                Email
+                                                אמייל
                                             </Typography>
                                         </Box>
                                         <Input
@@ -183,7 +181,7 @@ const Data4 = () => {
                                         }}>
                                             <Typography variant='body4' color="primary" textAlign={'right'} sx={{
                                             }}>
-                                                Mother Name
+                                                שם האם
                                             </Typography>
                                         </Box>
                                         <Input
@@ -200,7 +198,7 @@ const Data4 = () => {
                                         }}>
                                             <Typography variant='body4' color="primary" textAlign={'right'} sx={{
                                             }}>
-                                                Phone Number
+                                                מספר טלפון
                                             </Typography>
                                         </Box>
                                         <Input

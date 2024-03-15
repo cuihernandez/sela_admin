@@ -10,8 +10,8 @@ import { Delete } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import Card from '@mui/material/Card';
 import { useForm } from 'react-hook-form';
-import { collection, addDoc, deleteDoc, getDocs, doc } from "firebase/firestore/lite";
-import db from '../../firebase';
+import { collection, addDoc, deleteDoc, getDocs, doc, updateDoc } from "firebase/firestore/lite";
+import { db } from '../../firebase';
 const theme = createTheme({
     palette: {
         primary: {
@@ -66,6 +66,32 @@ const Data1 = () => {
             console.error("Error deleting document: ", e);
         }
     };
+    const [switchValue, setSwitchValue] = useState(false);
+    const handleSwitchChange = async (event) => {
+        const newValue = event.target.checked;
+        setSwitchValue(newValue);
+
+        // Correctly form the DocumentReference object
+        const docRef = doc(db, 'mobileStatus', 'a9vwcfIRLw3dzBNGjAHK');
+
+        try {
+            await updateDoc(docRef, { status: newValue });
+            console.log('The switch value is ', newValue);
+        } catch (error) {
+            console.error('Error updating document:', error);
+        }
+    };
+    useEffect(() => {
+        const fetchData = async () => {
+            const querySnapshot = await getDocs(collection(db, 'mobileStatus'));
+            const fetchData = querySnapshot.docs.map(doc => (
+                doc.data()
+            ));
+            setSwitchValue(fetchData[0].status);
+            console.log('this is my console', fetchData[0])
+        };
+        fetchData();
+    }, []);
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -74,13 +100,13 @@ const Data1 = () => {
                         {
                             bgcolor: '#F6FAFB',
                             borderRadius: 3,
-                            marginTop: -21,
+                            marginTop: -8,
                             marginLeft: 3
                         }
                     }
                 >
 
-                    <Box sx={{ marginBottom: 10 }}>
+                    <Box sx={{ marginBottom: 3 }}>
                         <Card elevation={10} sx={{
 
                             borderRadius: 3
@@ -91,6 +117,7 @@ const Data1 = () => {
                                 margin: 1,
                                 marginRight: 5,
                                 marginBottom: 4,
+                                hegiht: 300
                             }}>
                                 <Typography variant='h5' color="primary" fontWeight="bold">
                                     ימים פעילים
@@ -107,7 +134,10 @@ const Data1 = () => {
                                 }}
                             >
                                 <Typography color="black">ימי ראשון</Typography>
-                                <Switch {...label} defaultChecked />
+                                <Switch {...label}
+                                    checked={switchValue}
+                                    onChange={handleSwitchChange}
+                                />
                             </Box>
                         </Card>
                     </Box>
@@ -120,14 +150,12 @@ const Data1 = () => {
                                 justifyContent: 'flex-end',
                                 margin: 1,
                                 marginRight: 5,
-                                marginBottom: 1
+                                marginBottom: 1,
                             }}>
                                 <Typography variant='h5' color="primary" fontWeight="bold">
                                     ימים פעילים
                                 </Typography>
                             </Box>
-
-                            {/* textfield */}
                             <Box
                                 sx={{
                                     marginRight: 2,
@@ -137,11 +165,11 @@ const Data1 = () => {
                                     borderRadius: 3,
                                     borderColor: '#F1FFFF',
                                     overflow: 'auto',
-                                    maxHeight: 200
+                                    maxHeight: 300
                                 }}>
 
                                 {items.map((item) => (
-                                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', margin: 3 }}>
+                                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', margin: 3, marginBottom: 7 }}>
                                         <TextField
                                             multiline
                                             rows={3}

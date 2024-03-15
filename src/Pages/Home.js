@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
+import { Route, Routes } from "react-router-dom"
 import { Grid, Box, Container } from '@mui/material';
 import SideBar from '../components/SideBar';
 import Header from '../components/Header';

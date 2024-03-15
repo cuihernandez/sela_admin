@@ -19,7 +19,7 @@ import IconButton from '@mui/material/IconButton';
 import { visuallyHidden } from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
-import db from '../firebase';
+import { db } from '../firebase';
 import { collection, getDocs, query, where } from "firebase/firestore/lite";
 
 
@@ -57,31 +57,31 @@ const headCells = [
         id: 'dateToChoose',
         numeric: false,
         disablePadding: true,
-        label: 'Date to Choose',
+        label: 'תאריך לבחירה',
     },
     {
         id: 'activeTimes',
         numeric: true,
         disablePadding: false,
-        label: 'Active Times',
+        label: 'השלמתי תפילתי ',
     },
     {
         id: 'lastDate',
         numeric: true,
         disablePadding: false,
-        label: 'Last Date',
+        label: 'תאריך אחרון',
     },
     {
         id: 'email',
         numeric: true,
         disablePadding: false,
-        label: 'email',
+        label: 'אימייל',
     },
     {
         id: 'name',
         numeric: true,
         disablePadding: false,
-        label: 'name',
+        label: 'שם מלא',
     },
 ];
 
@@ -172,7 +172,7 @@ function EnhancedTableToolbar(props) {
                     id="tableTitle"
                     component="div"
                 >
-                    Doner Information
+                    מידע על דונר
                 </Typography>
             )}
 
@@ -182,27 +182,13 @@ function EnhancedTableToolbar(props) {
             >
                 <InputBase
                     sx={{ ml: 1, flex: 1 }}
-                    placeholder="Search"
+                    placeholder="לחפש"
                     inputProps={{ 'aria-label': 'search google maps' }}
                 />
                 <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
                     <SearchIcon />
                 </IconButton>
-
             </Paper>
-            {/* {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton>
-                        <DeleteIcon />
-                    </IconButton>
-                </Tooltip>
-            ) : (
-                <Tooltip title="Filter list">
-                    <IconButton>
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
-            )} */}
         </Toolbar>
     );
 }
@@ -218,7 +204,6 @@ export default function EnhancedTable() {
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
-    const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
     const handleRequestSort = (event, property) => {
@@ -264,24 +249,12 @@ export default function EnhancedTable() {
         setPage(0);
     };
 
-    // const handleChangeDense = (event) => {
-    //     setDense(event.target.checked);
-    // };
-
     const isSelected = (id) => selected.indexOf(id) !== -1;
 
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    // const visibleRows = React.useMemo(
-    //     () =>
-    //         stableSort(rows, getComparator(order, orderBy)).slice(
-    //             page * rowsPerPage,
-    //             page * rowsPerPage + rowsPerPage,
-    //         ),
-    //     [order, orderBy, page, rowsPerPage],
-    // );
     const [visibleRows, setVisibleRows] = useState([]);
     useEffect(() => {
         const updatedVisibleRows = stableSort(rows, getComparator(order, orderBy)).slice(
@@ -320,7 +293,6 @@ export default function EnhancedTable() {
             });
 
             Promise.all(promises).then(() => {
-                // console.log('object is :', arrays);
                 setRows(arrays);
             });
             return arrays;
@@ -331,14 +303,12 @@ export default function EnhancedTable() {
     const fetchCountValueByUserID = async (userID) => {
         const userDataRef = collection(db, 'userData');
         const q = query(userDataRef, where('userID', '==', userID));
-        // console.log("UserID: ", userID)
 
         try {
             const querySnapshot = await getDocs(q);
             let values = 0;
             querySnapshot.forEach((doc) => {
                 const value = doc.data().completeCount;
-                // values.push(value);
                 values = value;
             });
             return values;
@@ -358,7 +328,7 @@ export default function EnhancedTable() {
                     <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
-                        size={dense ? 'small' : 'medium'}
+                        size={'medium'}
                     >
                         <EnhancedTableHead
                             numSelected={selected.length}
@@ -412,7 +382,7 @@ export default function EnhancedTable() {
                             {emptyRows > 0 && (
                                 <TableRow
                                     style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
+                                        height: (53) * emptyRows,
                                     }}
                                 >
                                     <TableCell colSpan={6} />

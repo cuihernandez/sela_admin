@@ -8,8 +8,11 @@ import QuoteImage from '../../assets/bi_quote.png';
 import { ArrowBack } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import Card from '@mui/material/Card';
-import { collection, updateDoc, getDocs, doc } from "firebase/firestore/lite";
-import db from '../../firebase';
+import { Delete } from '@mui/icons-material';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { collection, updateDoc, getDocs, doc, addDoc, deleteDoc } from "firebase/firestore/lite";
+import { db } from '../../firebase';
 const theme = createTheme({
     palette: {
         primary: {
@@ -23,28 +26,86 @@ const theme = createTheme({
 });
 
 const Data2 = () => {
-    const [pearlText, setPearlText] = useState('');
-    const handlePearlText = (event) => {
-        setPearlText(event.target.value);
+    const [noticeText1, setNoticeText1] = useState('');
+    const [noticeText2, setNoticeText2] = useState('');
+
+    const handleNoticeText1 = (event) => {
+        setNoticeText1(event.target.value);
+    }
+    const handleNoticeText2 = (event) => {
+        setNoticeText2(event.target.value);
     }
     useEffect(() => {
         const fetchData = async () => {
-            const querySnapshot = await getDocs(collection(db, 'pearls'));
+            const querySnapshot = await getDocs(collection(db, 'notice'));
             const fetchData = querySnapshot.docs.map(doc => (
                 doc.data()
             ));
-            setPearlText(fetchData[0].data);
+            setNoticeText1(fetchData[0].text);
+            setNoticeText2(fetchData[1].text);
+            console.log('this is my console', fetchData[0], fetchData[1])
+            // setNoticeText2(fetchData.[1].data);
         };
         fetchData();
     }, []);
     const handlePearlButton = async () => {
-        const docRef = doc(db, 'pearls', 'USeuI3CaOCdhRZuwTqyP');
+        const docRef1 = doc(db, 'notice', '1');
+        const docRef2 = doc(db, 'notice', '2');
         try {
-            await updateDoc(docRef, { data: pearlText });
+            await updateDoc(docRef1, { text: noticeText1 });
+            await updateDoc(docRef2, { text: noticeText2 });
             console.log('Document updated successfully');
         } catch (e) {
             console.error('Error updating document:', e);
         }
+    };
+
+
+
+
+    const { register, handleSubmit, reset } = useForm();
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const querySnapshot = await getDocs(collection(db, 'pearls'));
+            const fetchedItems = querySnapshot.docs.map(doc => ({
+                id: doc.id, // Store document ID for deletion
+                ...doc.data()
+            }));
+            setItems(fetchedItems);
+        };
+
+        fetchData();
+    }, []);
+
+    const onSubmit = async (formData) => {
+        try {
+            const docRef = await addDoc(collection(db, 'pearls'), {
+                text: formData.newText // Assuming you want to store text under "text" field
+            });
+            console.log("Document written with ID: ", docRef.id);
+            // Update local state with new item
+            setItems(prev => [...prev, { id: docRef.id, text: formData.newText }]);
+            reset(); // Reset form after submission
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
+    };
+
+    const handleDelete = async (docId) => {
+        try {
+            await deleteDoc(doc(db, 'pearls', docId));
+            console.log("Document deleted with ID: ", docId);
+            // Update local state to remove the item
+            setItems(prev => prev.filter(item => item.id !== docId));
+        } catch (e) {
+            console.error("Error deleting document: ", e);
+        }
+    };
+    const navigate = useNavigate();
+    const handleBack = () => {
+        navigate(-1); // Navigate back to the previous page
     };
     return (
         <>
@@ -72,7 +133,9 @@ const Data2 = () => {
                                 marginRight: 3,
                             }}
                         >
-                            <ArrowBack color='primary' />
+                            <Button onClick={handleBack}>
+                                <ArrowBack color='primary' />
+                            </Button>
                         </Box>
                         <Box
                             sx={{
@@ -101,17 +164,36 @@ const Data2 = () => {
                         <Box
                             sx={{
                                 marginRight: 2,
-                                marginLeft: 2
+                                marginLeft: 2,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
                             }}>
                             <TextField
                                 multiline
-                                rows={7}
+                                rows={3}
                                 variant="outlined"
                                 sx={{
                                     width: "100%",
                                     hegiht: "30%",
                                     bgcolor: 'white',
-                                }} />
+                                    margin: 2
+                                }}
+                                value={noticeText1}
+                                onChange={handleNoticeText1} />
+                            <TextField
+                                multiline
+                                rows={3}
+                                variant="outlined"
+                                sx={{
+                                    width: "100%",
+                                    hegiht: "30%",
+                                    bgcolor: 'white',
+                                    margin: 2
+                                }}
+                                value={noticeText2}
+                                onChange={handleNoticeText2}
+                            />
                         </Box>
 
                         <Box sx={{
@@ -125,7 +207,8 @@ const Data2 = () => {
                                     borderRadius: 4
                                 }
                             }
-                            >שמור שינויים</Button>
+
+                                onClick={handlePearlButton}>שמור שינויים</Button>
                         </Box>
 
                     </Card>
@@ -164,108 +247,96 @@ const Data2 = () => {
                                 marginRight: 2,
                                 marginLeft: 2
                             }}>
-                            <TextField
-                                multiline
-                                rows={1}
-                                variant="outlined"
-                                sx={{
-                                    width: "100%",
-                                    hegiht: "30%",
-                                    bgcolor: 'white',
-                                }}
-                                value={pearlText}
-                                onChange={handlePearlText}
-                            />
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'flex-end',
-                                    flexDirection: 'column'
-                                }}>
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'flex-end',
-                                }}>
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <TextField
+                                    multiline
+                                    rows={1}
+                                    variant="outlined"
+                                    sx={{
+                                        width: "100%",
+                                        hegiht: "30%",
+                                        bgcolor: 'white',
+                                    }}
+                                    {...register('newText')}
+                                />
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                        flexDirection: 'column'
+                                    }}>
                                     <Box sx={{
                                         display: 'flex',
                                         justifyContent: 'flex-end',
-                                        marginTop: 3
-                                    }}>
-                                        <Button color="secondary" sx={
-                                            {
-                                                bgcolor: '#560FC9',
-                                                borderRadius: 3
-                                            }
-                                        }
-
-                                            onClick={handlePearlButton}>שמור שינויים</Button>
-                                    </Box>
-
-                                </Box>
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'flex-end'
-                                }}>
-
-                                    <Box sx={{
-                                        borderRadius: 3,
-                                        backgroundColor: '#F1E6FF',
-                                        margin: 2,
-                                        marginRight: 0,
-                                        width: '70%',
-                                        // display: 'flex',
-                                        // justifyContent: 'flex-end',
                                     }}>
                                         <Box sx={{
-
+                                            display: 'flex',
+                                            justifyContent: 'flex-end',
+                                            marginTop: 3
                                         }}>
-                                            <img src={QuoteImage} alt="edit" style={{ width: 'auto', height: 'auto' }} />
+                                            <Button color="secondary"
+                                                sx={
+                                                    {
+                                                        bgcolor: '#560FC9',
+                                                        borderRadius: 3
+                                                    }
+                                                }
+                                                type="submit"
+
+                                            >שמור שינויים</Button>
                                         </Box>
 
-                                        <Box>
-                                            <Box sx={{
-                                                display: 'flex',
-                                                justifyContent: 'flex-end',
-                                                marginRight: 2
-                                            }}>
-                                                <Typography variant='body3' color="primary" fontWeight={'bold'} >
-                                                    הוסף תאריך
-                                                </Typography>
-                                            </Box>
-
-                                            <Box sx={{
-                                                display: 'flex',
-                                                justifyContent: 'flex-end',
-                                                marginTop: 1,
-                                                marginRight: 2
-                                            }}>
-                                                <Typography variant='body2' color="gray" >
-                                                    הוסף תאריך
-                                                </Typography>
-                                            </Box>
-
-
-                                            <Box sx={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                paddingRight: 4,
-                                                paddingLeft: 2,
-                                                marginTop: 1,
-                                                marginBottom: 3
-
-                                            }}>
-                                                <Typography variant='body2' color="gray" >
-                                                    12/01/2024
-                                                </Typography>
-                                                <Typography variant='body2' color="primary" >
-                                                    הוסף תאריך
-                                                </Typography>
-                                            </Box>
-
-                                        </Box>
                                     </Box>
+                                    {items.map((item) => (
+                                        <Box key={item.id} sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <Box>
+                                                <Button onClick={() => handleDelete(item.id)}>
+                                                    <Delete />
+                                                </Button>
+                                            </Box>
+
+
+                                            <Box sx={{
+                                                borderRadius: 3,
+                                                backgroundColor: '#F1E6FF',
+                                                margin: 2,
+                                                marginRight: 0,
+                                                width: '70%',
+                                                // display: 'flex',
+                                                // justifyContent: 'flex-end',
+                                            }}>
+
+                                                <Box sx={{
+
+                                                }}>
+                                                    <img src={QuoteImage} alt="edit" style={{ width: 'auto', height: 'auto' }} />
+                                                </Box>
+
+                                                <Box>
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'flex-end',
+                                                        marginRight: 2,
+                                                        padding: 2,
+                                                        paddingBottom: 4
+                                                    }}>
+
+                                                        <Typography variant='body3' fontWeight={'bold'} >
+                                                            {item.text}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+
+                                    ))}
+
                                 </Box>
-                            </Box>
+                            </form>
                         </Box>
                     </Card>
                 </Grid>

@@ -22,7 +22,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import Button from '@mui/material/Button';
 import EditImage from '../assets/Edit_btn_icon.png';
 import { collection, getDocs, query, where } from "firebase/firestore/lite";
-import db from '../firebase';
+import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { useEditContext } from '../EditContext';
 
@@ -62,32 +62,32 @@ const headCells = [
         id: 'edit',
         numeric: true,
         disablePadding: false,
-        label: 'Edit',
+        label: '',
     },
 
     {
         id: 'credit',
         numeric: true,
         disablePadding: false,
-        label: 'Credit',
+        label: 'יתרת קרדיט',
     },
     {
         id: 'totalDonation',
         numeric: true,
         disablePadding: false,
-        label: 'Total Donation',
+        label: 'תרומות',
     },
     {
         id: 'email',
         numeric: true,
         disablePadding: false,
-        label: 'email',
+        label: 'אימייל',
     },
     {
         id: 'name',
         numeric: true,
         disablePadding: false,
-        label: 'name',
+        label: 'שם מלא',
     },
 ];
 
@@ -178,7 +178,7 @@ function EnhancedTableToolbar(props) {
                     id="tableTitle"
                     component="div"
                 >
-                    Donee Information
+                    מידע בוצ
                 </Typography>
             )}
 
@@ -188,7 +188,7 @@ function EnhancedTableToolbar(props) {
             >
                 <InputBase
                     sx={{ ml: 1, flex: 1 }}
-                    placeholder="Search"
+                    placeholder="לחפש"
                     inputProps={{ 'aria-label': 'search google maps' }}
                 />
                 <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
@@ -215,7 +215,6 @@ export default function EnhancedTable() {
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
-    const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [rows, setRows] = useState([]);
 
@@ -262,24 +261,11 @@ export default function EnhancedTable() {
         setPage(0);
     };
 
-    const handleChangeDense = (event) => {
-        setDense(event.target.checked);
-    };
-
     const isSelected = (id) => selected.indexOf(id) !== -1;
 
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-    // const visibleRows = React.useMemo(
-    //     () =>
-    //         stableSort(rows, getComparator(order, orderBy)).slice(
-    //             page * rowsPerPage,
-    //             page * rowsPerPage + rowsPerPage,
-    //         ),
-    //     [order, orderBy, page, rowsPerPage],
-    // );
     const [visibleRows, setVisibleRows] = useState([]);
     useEffect(() => {
         const updatedVisibleRows = stableSort(rows, getComparator(order, orderBy)).slice(
@@ -317,9 +303,7 @@ export default function EnhancedTable() {
                 );
 
                 Promise.all(promises).then(() => {
-                    // console.log('object is :', arrays);
                     setRows(arrays);
-                    // console.log('test data is ', test, "array data is", arrays);
                 });
                 return arrays;
             }).catch((error) => {
@@ -365,7 +349,7 @@ export default function EnhancedTable() {
                     <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
-                        size={dense ? 'small' : 'medium'}
+                        size={'medium'}
                     >
                         <EnhancedTableHead
                             numSelected={selected.length}
@@ -421,7 +405,7 @@ export default function EnhancedTable() {
                             {emptyRows > 0 && (
                                 <TableRow
                                     style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
+                                        height: (53) * emptyRows,
                                     }}
                                 >
                                     <TableCell colSpan={6} />

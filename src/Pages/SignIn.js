@@ -6,11 +6,12 @@ import Box from '@mui/material/Box';
 import { makeStyles } from '@mui/styles';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { Input } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import backgroundImage from '../assets/bg.png';
-// TODO remove, this demo shouldn't need to reset the theme.
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
+// TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 const useStyles = makeStyles({
     root: {
@@ -24,14 +25,31 @@ export default function SignIn() {
 
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
-    const handleSubmit = () => {
-        // event.preventDefault();
-        console.log('email:', email, 'password:', password);
-    };
-    const classes = useStyles();
-    if (localStorage.getItem("wagmi.store")) {
-        window.location.href = "/";
+
+    const handlePassword = (event) => {
+        event.preventDefault();
+        setPassword(event.target.value);
     }
+    const handleEmail = (event) => {
+        event.preventDefault();
+        setEmail(event.target.value);
+    }
+    const classes = useStyles();
+
+    const handleSignIn = async () => {
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            localStorage.setItem('token', user.accessToken);
+            console.log('User signed in:', user.accessToken);
+            if (localStorage.getItem("token") === user.accessToken) {
+                window.location.href = "/tabledonor";
+            }
+            // Redirect or perform further actions upon successful sign-in
+        } catch (error) {
+            console.error('Error signing in:', error.message);
+        }
+    };
     return (
         <div className={classes.root}>
             <ThemeProvider theme={defaultTheme}>
@@ -60,18 +78,16 @@ export default function SignIn() {
                         <Typography component="h1" variant="h5">
                             הירשם
                         </Typography>
-                        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                            {/* <TextField
+                        <Box cnoValidate sx={{ mt: 1 }}>
+                            <TextField
                                 margin="normal"
                                 required
                                 fullWidth
-                                id="email"
                                 name="email"
-                                autoComplete="email"
-                                autoFocus
+                                style={{ borderRadius: 30, backgroundColor: '#F1E6FF' }}
                                 placeholder='אימייל'
                                 value={email}
-                                onChange={setEmail}
+                                onChange={handleEmail}
                             />
                             <TextField
                                 margin="normal"
@@ -79,48 +95,16 @@ export default function SignIn() {
                                 fullWidth
                                 name="password"
                                 type="password"
-                                id="password"
-                                autoComplete="current-password"
                                 placeholder='סיסמה'
-                                style={{ borderRadius: 30, backgroundColor: '#F1E6FF' }}
-                                variant="outlined"
-                                InputProps={{
-                                    style: {
-                                        border: "none",
-                                    },
-                                }}
+                                style={{ borderRadius: 30, backgroundColor: '#F1E6FF', border: 'none' }}
                                 value={password}
-                                onChange={setPassword}
-                            /> */}
-                            <Input
-                                margin="normal"
-                                required
-                                fullWidth
-                                autoComplete="current-password"
-                                placeholder='סיסמה'
-                                style={{ borderRadius: 30, backgroundColor: '#F1E6FF' }}
-                                variant="outlined"
-                                InputProps={{
-                                    style: {
-                                        border: "none",
-                                    },
-                                }}
-
-                                value={email}
-                                onChange={setEmail}
-                            />
-
-                            <Input
-                                placeholder='password'
-                                onChange={setPassword}
-                                value={password}
+                                onChange={handlePassword}
                             />
                             <Button
-                                type="submit"
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2 }}
-                                onClick={handleSubmit}
+                                onClick={handleSignIn}
                             >
                                 החל מסנן
                             </Button>

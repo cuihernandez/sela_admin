@@ -7,7 +7,8 @@ import Card from '@mui/material/Card';
 import Transfer from '../Transfer';
 import { useEditContext } from '../../EditContext';
 import { collection, getDocs, where, query } from "firebase/firestore/lite";
-import db from '../../firebase';
+import { db } from '../../firebase';
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -72,7 +73,7 @@ const Data3 = () => {
                                     marginBottom: 4
                                 }}>
                                     <Typography variant='h5' color="primary" fontWeight="bold">
-                                        ימים פעילים
+                                        הפקדות וקרדיט
                                     </Typography>
                                 </Box>
 

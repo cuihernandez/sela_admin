@@ -5,10 +5,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import iconImage from '../assets/icon.png';
 import { Grid } from '@mui/material';
-import TableDonee from './Tables_donee';
-import TableDonor from './Tables_doner';
-import Edit from './Edit';
-import Donors from './Donors';
 import { Link } from 'react-router-dom';
 
 function RightAlignedContainer() {
