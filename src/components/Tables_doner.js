@@ -19,100 +19,9 @@ import IconButton from '@mui/material/IconButton';
 import { visuallyHidden } from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
+import db from '../firebase';
+import { collection, getDocs, query, where } from "firebase/firestore/lite";
 
-import { initializeApp } from 'firebase/app';
-import firebase from 'firebase/app';
-import { collection, getFirestore, getDocs, query, where } from "firebase/firestore/lite";
-const firebaseConfig = {
-    apiKey: "AIzaSyD1HUcvmYv6rpgCIJHfHoYEhXCgEIbnSFQ",
-    authDomain: "sela-238dc.firebaseapp.com",
-    databaseURL: "https://sela-238dc-default-rtdb.firebaseio.com",
-    projectId: "sela-238dc",
-    storageBucket: "gs://sela-238dc.appspot.com",
-    messagingSenderId: "195049554939",
-    appId: "1:195049554939:android:178e412da41a791124815e"
-};
-let rows = [];
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const dbLoad = () => {
-    const users = collection(db, 'users');
-    let arrays = [];
-    let idCounter = 0;
-    getDocs(users).then((querySnapshot) => {
-        const promises = [];
-        querySnapshot.forEach((doc) => {
-            promises.push(fetchCountValueByUserID(doc.id).then((response) => {
-                const timestamp = doc.data().registertime; // Assuming this is the timestamp value
-                const date = new Date(timestamp);
-                const formattedDate = `${('0' + date.getDate()).slice(-2)}/${('0' + (date.getMonth() + 1)).slice(-2)}/${date.getFullYear()}`;
-                let obj = {
-                    id: idCounter,
-                    userId: doc.id,
-                    name: doc.data().name,
-                    email: doc.data().email,
-                    lastDate: formattedDate,
-                    activeTimes: response, // Use the response from fetchCountValueByUserID
-                    dateToChoose: formattedDate
-                };
-                arrays.push(obj);
-                idCounter++;
-            }));
-        });
-
-        Promise.all(promises).then(() => {
-            console.log('object is :', arrays);
-            rows = arrays;
-        });
-        return arrays;
-    }).catch((error) => {
-        console.error('Error getting documents: ', error);
-    });
-}
-const fetchCountValueByUserID = async (userID) => {
-    const userDataRef = collection(db, 'userData');
-    const q = query(userDataRef, where('userID', '==', userID));
-    // console.log("UserID: ", userID)
-
-    try {
-        const querySnapshot = await getDocs(q);
-        let values = 0;
-        querySnapshot.forEach((doc) => {
-            const value = doc.data().completeCount;
-            // values.push(value);
-            values = value;
-        });
-        return values;
-    } catch (error) {
-        console.error('Error getting documents: ', error);
-    }
-};
-// function createData(id, name, email, lastDate, activeTimes, dateToChoose) {
-//     return {
-//         id,
-//         name,
-//         email,
-//         lastDate,
-//         activeTimes,
-//         dateToChoose,
-//     };
-// }
-
-// const rows = [
-//     createData(1, 'Cupcake', 'asaf@gmail.com', 3.7, 67, 4.3),
-//     createData(2, 'Donut', 'asaf@gmail.com', 25.0, 51, 4.9),
-//     createData(3, 'Eclair', 'asaf@gmail.com', 16.0, 24, 6.0),
-//     createData(4, 'Frozen yoghurt', 159, 6.0, 24, 4.0),
-//     createData(5, 'Gingerbread', 356, 16.0, 49, 3.9),
-//     createData(6, 'Honeycomb', 408, 3.2, 87, 6.5),
-//     createData(7, 'Ice cream sandwich', 237, 9.0, 37, 4.3),
-//     createData(8, 'Jelly Bean', 375, 0.0, 94, 0.0),
-//     createData(9, 'KitKat', 518, 26.0, 65, 7.0),
-//     createData(10, 'Lollipop', 392, 0.2, 98, 0.0),
-//     createData(11, 'Marshmallow', 318, 0, 81, 2.0),
-//     createData(12, 'Nougat', 360, 19.0, 9, 37.0),
-//     createData(13, 'Oreo', 437, 18.0, 63, 4.0),
-// ];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -190,7 +99,7 @@ function EnhancedTableHead(props) {
                 {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}
-                        align={headCell.numeric ? 'right' : 'left'}
+                        align='right'
                         padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
@@ -304,7 +213,7 @@ EnhancedTableToolbar.propTypes = {
 
 export default function EnhancedTable() {
 
-
+    const [rows, setRows] = React.useState([]);
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
@@ -365,15 +274,78 @@ export default function EnhancedTable() {
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = React.useMemo(
-        () =>
-            stableSort(rows, getComparator(order, orderBy)).slice(
-                page * rowsPerPage,
-                page * rowsPerPage + rowsPerPage,
-            ),
-        [order, orderBy, page, rowsPerPage],
-    );
+    // const visibleRows = React.useMemo(
+    //     () =>
+    //         stableSort(rows, getComparator(order, orderBy)).slice(
+    //             page * rowsPerPage,
+    //             page * rowsPerPage + rowsPerPage,
+    //         ),
+    //     [order, orderBy, page, rowsPerPage],
+    // );
+    const [visibleRows, setVisibleRows] = useState([]);
+    useEffect(() => {
+        const updatedVisibleRows = stableSort(rows, getComparator(order, orderBy)).slice(
+            page * rowsPerPage,
+            page * rowsPerPage + rowsPerPage
+        );
+        setVisibleRows(updatedVisibleRows);
+    }, [rows, order, orderBy, page, rowsPerPage]);
 
+    useEffect(() => {
+        setVisibleRows(rows);
+    }, [rows]);
+    const dbLoad = () => {
+        const users = collection(db, 'users');
+        let arrays = [];
+        let idCounter = 0;
+        getDocs(users).then((querySnapshot) => {
+            const promises = [];
+            querySnapshot.forEach((doc) => {
+                promises.push(fetchCountValueByUserID(doc.id).then((response) => {
+                    const timestamp = doc.data().registertime; // Assuming this is the timestamp value
+                    const date = new Date(timestamp);
+                    const formattedDate = `${('0' + date.getDate()).slice(-2)}/${('0' + (date.getMonth() + 1)).slice(-2)}/${date.getFullYear()}`;
+                    let obj = {
+                        id: idCounter,
+                        userId: doc.id,
+                        name: doc.data().name,
+                        email: doc.data().email,
+                        lastDate: formattedDate,
+                        activeTimes: response, // Use the response from fetchCountValueByUserID
+                        dateToChoose: formattedDate
+                    };
+                    arrays.push(obj);
+                    idCounter++;
+                }));
+            });
+
+            Promise.all(promises).then(() => {
+                // console.log('object is :', arrays);
+                setRows(arrays);
+            });
+            return arrays;
+        }).catch((error) => {
+            console.error('Error getting documents: ', error);
+        });
+    }
+    const fetchCountValueByUserID = async (userID) => {
+        const userDataRef = collection(db, 'userData');
+        const q = query(userDataRef, where('userID', '==', userID));
+        // console.log("UserID: ", userID)
+
+        try {
+            const querySnapshot = await getDocs(q);
+            let values = 0;
+            querySnapshot.forEach((doc) => {
+                const value = doc.data().completeCount;
+                // values.push(value);
+                values = value;
+            });
+            return values;
+        } catch (error) {
+            console.error('Error getting documents: ', error);
+        }
+    };
     useEffect(() => {
         dbLoad();
     }, []
@@ -413,10 +385,7 @@ export default function EnhancedTable() {
                                         sx={{ cursor: 'pointer' }}
                                     >
                                         <TableCell
-                                            component="th"
-                                            id={labelId}
-                                            scope="row"
-                                            padding="none"
+                                            align="right"
                                         >
                                             {row.dateToChoose}
                                         </TableCell>
@@ -424,7 +393,10 @@ export default function EnhancedTable() {
                                         <TableCell align="right">{row.lastDate}</TableCell>
                                         <TableCell align="right">{row.email}</TableCell>
                                         <TableCell align="right">{row.name}</TableCell>
-                                        <TableCell padding="checkbox">
+                                        <TableCell padding="checkbox"
+                                            component="th"
+                                            id={labelId}
+                                            scope="row">
                                             <Checkbox
                                                 onChange={(event) => handleClick(event, row.id)}
                                                 color="primary"

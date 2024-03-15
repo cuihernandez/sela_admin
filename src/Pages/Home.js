@@ -7,7 +7,7 @@ import TablesDoner from '../components/Tables_doner';
 import Edit from '../components/Edit'
 import TableDonee from '../components/Tables_donee';
 import Donors from '../components/Donors';
-
+import { EditProvider } from '../EditContext';
 
 function Home() {
 
@@ -29,12 +29,14 @@ function Home() {
                                 <Box
                                     sx={mainContentBoxStyle}
                                 >
-                                    <Routes>
-                                        <Route path="/edit" element={<Edit />} />
-                                        <Route path="/donors" element={<Donors />} />
-                                        <Route path="/tabledonee" element={<TableDonee />} />
-                                        <Route path="/tabledonor" element={<TablesDoner />} />
-                                    </Routes>
+                                    <EditProvider>
+                                        <Routes>
+                                            <Route path="/edit" element={<Edit />} />
+                                            <Route path="/donors/:id" element={<Donors />} />
+                                            <Route path="/tabledonee" element={<TableDonee />} />
+                                            <Route path="/tabledonor" element={<TablesDoner />} />
+                                        </Routes>
+                                    </EditProvider>
                                 </Box>
                             </Box>
                         </Grid>

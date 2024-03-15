@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -20,93 +20,14 @@ import { visuallyHidden } from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import Button from '@mui/material/Button';
-
 import EditImage from '../assets/Edit_btn_icon.png';
-import { initializeApp } from 'firebase/app';
+import { collection, getDocs, query, where } from "firebase/firestore/lite";
+import db from '../firebase';
+import { useNavigate } from 'react-router-dom';
+import { useEditContext } from '../EditContext';
 
-import { collection, getFirestore, getDocs, query, where } from "firebase/firestore/lite";
-const firebaseConfig = {
-    apiKey: "AIzaSyD1HUcvmYv6rpgCIJHfHoYEhXCgEIbnSFQ",
-    authDomain: "sela-238dc.firebaseapp.com",
-    databaseURL: "https://sela-238dc-default-rtdb.firebaseio.com",
-    projectId: "sela-238dc",
-    storageBucket: "gs://sela-238dc.appspot.com",
-    messagingSenderId: "195049554939",
-    appId: "1:195049554939:android:178e412da41a791124815e"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-let rows = [];
-const dbLoad = () => {
-    const users = collection(db, 'transaction');
-    let arrays = [];
-    let idCounter = 0;
-    getDocs(users).then((querySnapshot) => {
-        const promises = [];
-        querySnapshot.forEach((doc) => {
-            promises.push(countPrayTimeAndAmount(doc.data().donorID, doc.data().doneeName).then((response) => {
-                let obj = {
-                    id: idCounter,
-                    // userId: doc.id,
-                    name: response.doneeName,
-                    email: response.doneeEmail,
-                    totalDonation: response.totalDonation,
-                    credit: response.totalDonation - response.prayTime * 0.2, // Use the response from fetchCountValueByUserID
-                };
-                arrays.push(obj);
-                idCounter++;
-            }));
-        });
 
-        Promise.all(promises).then(() => {
-            console.log('object is :', arrays);
-            rows = arrays;
-        });
-        return arrays;
-    }).catch((error) => {
-        console.error('Error getting documents: ', error);
-    });
-}
 
-const countPrayTimeAndAmount = async (donorId, name) => {
-    const userDataRef = collection(db, 'transaction');
-    const q = query(userDataRef, where('donorID', '==', donorId), where('doneeName', '==', name));
-    try {
-        const querySnapshot = await getDocs(q);
-        let prayTime = 0;
-        let totalDonation = 0;
-        let doneeEmail = '';
-        let doneeName = '';
-        querySnapshot.forEach((doc) => {
-            const value = doc.data().transactionAmount;
-            doneeName = doc.data().doneeName;
-            doneeEmail = doc.data().doneeEmail;
-            totalDonation += value;
-            prayTime++;
-
-        });
-        return { doneeName, doneeEmail, prayTime, totalDonation };
-
-    }
-    catch {
-
-    }
-}
-// const rows = [
-//     createData(1, 'Cupcake', 'asaf@gmail.com', 3.7, 67),
-//     createData(2, 'Donut', 'asaf@gmail.com', 25.0, 51),
-//     createData(3, 'Eclair', 'asaf@gmail.com', 16.0, 24),
-//     createData(4, 'Frozen yoghurt', 159, 6.0, 24),
-//     createData(5, 'Gingerbread', 356, 16.0, 49),
-//     createData(6, 'Honeycomb', 408, 3.2, 87),
-//     createData(7, 'Ice cream sandwich', 237, 9.0, 37),
-//     createData(8, 'Jelly Bean', 375, 0.0, 94),
-//     createData(9, 'KitKat', 518, 26.0, 65),
-//     createData(10, 'Lollipop', 392, 0.2, 98),
-//     createData(11, 'Marshmallow', 318, 0, 81),
-//     createData(12, 'Nougat', 360, 19.0, 9),
-//     createData(13, 'Oreo', 437, 18.0, 63),
-// ];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -124,10 +45,6 @@ function getComparator(order, orderBy) {
         : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
-// stableSort() brings sort stability to non-modern browsers (notably IE11). If you
-// only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
-// with exampleArray.slice().sort(exampleComparator)
 function stableSort(array, comparator) {
     const stabilizedThis = array.map((el, index) => [el, index]);
     stabilizedThis.sort((a, b) => {
@@ -279,19 +196,6 @@ function EnhancedTableToolbar(props) {
                 </IconButton>
 
             </Paper>
-            {/* {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton>
-                        <DeleteIcon />
-                    </IconButton>
-                </Tooltip>
-            ) : (
-                <Tooltip title="Filter list">
-                    <IconButton>
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
-            )} */}
         </Toolbar>
     );
 }
@@ -301,12 +205,19 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function EnhancedTable() {
+    const navigate = useNavigate();
+    const { updateEditData } = useEditContext();
+    const handleDonorClick = (rowData) => {
+        updateEditData(rowData);
+        navigate(`/donors/${rowData.id}`);
+    }
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [rows, setRows] = useState([]);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -361,33 +272,91 @@ export default function EnhancedTable() {
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = React.useMemo(
-        () =>
-            stableSort(rows, getComparator(order, orderBy)).slice(
-                page * rowsPerPage,
-                page * rowsPerPage + rowsPerPage,
-            ),
-        [order, orderBy, page, rowsPerPage],
+    // const visibleRows = React.useMemo(
+    //     () =>
+    //         stableSort(rows, getComparator(order, orderBy)).slice(
+    //             page * rowsPerPage,
+    //             page * rowsPerPage + rowsPerPage,
+    //         ),
+    //     [order, orderBy, page, rowsPerPage],
+    // );
+    const [visibleRows, setVisibleRows] = useState([]);
+    useEffect(() => {
+        const updatedVisibleRows = stableSort(rows, getComparator(order, orderBy)).slice(
+            page * rowsPerPage,
+            page * rowsPerPage + rowsPerPage
+        );
+        setVisibleRows(updatedVisibleRows);
+    }, [rows, order, orderBy, page, rowsPerPage]);
+
+    useEffect(() => {
+        setVisibleRows(rows);
+    }, [rows]);
+    useEffect(() => {
+        const dbLoad = () => {
+            const users = collection(db, 'transaction');
+            let arrays = [];
+            let idCounter = 0;
+            getDocs(users).then((querySnapshot) => {
+                const promises = [];
+                querySnapshot.forEach((doc) => {
+                    promises.push(countPrayTimeAndAmount(doc.data().donorID, doc.data().doneeName).then((response) => {
+                        let obj = {
+                            id: idCounter,
+                            donorID: response.donorID,
+                            name: response.doneeName,
+                            email: response.doneeEmail,
+                            totalDonation: response.totalDonation,
+                            credit: response.totalDonation - response.prayTime * 0.2, // Use the response from fetchCountValueByUserID
+                        };
+                        // console.log('response:   ', response);
+                        arrays.push(obj);
+                        idCounter++;
+                    }));
+                }
+                );
+
+                Promise.all(promises).then(() => {
+                    // console.log('object is :', arrays);
+                    setRows(arrays);
+                    // console.log('test data is ', test, "array data is", arrays);
+                });
+                return arrays;
+            }).catch((error) => {
+                console.error('Error getting documents: ', error);
+            });
+        }
+
+        const countPrayTimeAndAmount = async (donorId, name) => {
+            const userDataRef = collection(db, 'transaction');
+            const q = query(userDataRef, where('donorID', '==', donorId), where('doneeName', '==', name));
+            try {
+                const querySnapshot = await getDocs(q);
+                let prayTime = 0;
+                let totalDonation = 0;
+                let doneeEmail = '';
+                let doneeName = '';
+                let donorID = '';
+                querySnapshot.forEach((doc) => {
+                    const value = doc.data().transactionAmount;
+                    doneeName = doc.data().doneeName;
+                    doneeEmail = doc.data().doneeEmail;
+                    totalDonation += value;
+                    prayTime++;
+                    donorID = doc.data().donorID;
+
+                });
+                return { doneeName, doneeEmail, prayTime, totalDonation, donorID };
+
+            }
+            catch {
+
+            }
+        }
+        dbLoad();
+    }, []
+
     );
-    dbLoad();
-
-    // const getResult2 = async () => {
-    //     try {
-
-    //         const donorID = "iDGV3WYZWcO9otGg5J3g";
-    //         const name = "Jerry";
-    //         const result = await countPrayTimeAndAmount(donorID, name);
-    //         console.log('donor pray to Jerry', result.prayTime, 'times and the amount of prayDonation is', result.totalDonation);
-
-    //     }
-
-    //     catch (error) {
-    //         console.error('Error is:', error);
-    //     }
-    // }
-    // Call the getResult function to execute fetchTotalDonation and get the return value
-
-
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
@@ -428,7 +397,7 @@ export default function EnhancedTable() {
                                             padding="none"
                                             align='right'
                                         >
-                                            <Button>
+                                            <Button onClick={() => handleDonorClick(row)}>
                                                 <img src={EditImage} alt="edit" style={{ width: 15, height: 15 }} />
                                             </Button>
                                         </TableCell>

@@ -1,4 +1,4 @@
-import React from 'react';
+import { React, useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -8,6 +8,8 @@ import QuoteImage from '../../assets/bi_quote.png';
 import { ArrowBack } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import Card from '@mui/material/Card';
+import { collection, updateDoc, getDocs, doc } from "firebase/firestore/lite";
+import db from '../../firebase';
 const theme = createTheme({
     palette: {
         primary: {
@@ -21,6 +23,29 @@ const theme = createTheme({
 });
 
 const Data2 = () => {
+    const [pearlText, setPearlText] = useState('');
+    const handlePearlText = (event) => {
+        setPearlText(event.target.value);
+    }
+    useEffect(() => {
+        const fetchData = async () => {
+            const querySnapshot = await getDocs(collection(db, 'pearls'));
+            const fetchData = querySnapshot.docs.map(doc => (
+                doc.data()
+            ));
+            setPearlText(fetchData[0].data);
+        };
+        fetchData();
+    }, []);
+    const handlePearlButton = async () => {
+        const docRef = doc(db, 'pearls', 'USeuI3CaOCdhRZuwTqyP');
+        try {
+            await updateDoc(docRef, { data: pearlText });
+            console.log('Document updated successfully');
+        } catch (e) {
+            console.error('Error updating document:', e);
+        }
+    };
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -86,8 +111,7 @@ const Data2 = () => {
                                     width: "100%",
                                     hegiht: "30%",
                                     bgcolor: 'white',
-                                }}>
-                            </TextField>
+                                }} />
                         </Box>
 
                         <Box sx={{
@@ -100,7 +124,8 @@ const Data2 = () => {
                                     bgcolor: '#560FC9',
                                     borderRadius: 4
                                 }
-                            }>שמור שינויים</Button>
+                            }
+                            >שמור שינויים</Button>
                         </Box>
 
                     </Card>
@@ -147,8 +172,10 @@ const Data2 = () => {
                                     width: "100%",
                                     hegiht: "30%",
                                     bgcolor: 'white',
-                                }}>
-                            </TextField>
+                                }}
+                                value={pearlText}
+                                onChange={handlePearlText}
+                            />
                             <Box
                                 sx={{
                                     display: 'flex',
@@ -169,7 +196,9 @@ const Data2 = () => {
                                                 bgcolor: '#560FC9',
                                                 borderRadius: 3
                                             }
-                                        }>שמור שינויים</Button>
+                                        }
+
+                                            onClick={handlePearlButton}>שמור שינויים</Button>
                                     </Box>
 
                                 </Box>

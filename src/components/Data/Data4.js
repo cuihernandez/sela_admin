@@ -1,16 +1,19 @@
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { Input } from '@mui/material';
-import { ArrowBack, Edit } from '@mui/icons-material';
+import { ArrowBack } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import Card from '@mui/material/Card';
-import TextField from '@mui/material/TextField';
-
+import { useNavigate } from 'react-router-dom'
 import EditImage from '../../assets/Edit.png';
-import IconImage from '../../assets/splash_icon.png'
+import IconImage from '../../assets/splash_icon.png';
+import { useEditContext } from '../../EditContext';
+import { collection, getDocs } from "firebase/firestore/lite";
+import db from '../../firebase';
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -23,11 +26,51 @@ const theme = createTheme({
     },
 });
 
-const Data2 = () => {
-    // const [name, setName] = useState('');
-    // const [email, setEmail] = useState('');
-    // const [motherName, setMotherName] = useState('');
-    // const [phone, setPhone] = useState('');
+
+const getColumnData = async (donorID) => {
+    const users = collection(db, 'users');
+    const querySnapshot = await getDocs(users);
+    let documentData = ''; // Initialize as null for clarity
+    querySnapshot.forEach((doc) => {
+        if (doc.id == donorID) { // Use === for comparison
+            documentData = doc.data();
+
+        }
+        else {
+            console.log('The data is not exist')
+        }
+    });
+
+    if (documentData) {
+        // console.log('Document data:', documentData);
+    } else {
+        console.log('No document found with that ID.');
+    }
+    return documentData;
+}
+
+
+
+
+const Data4 = () => {
+    const { editData } = useEditContext();
+    const [donorInfo, setDonorInfo] = useState({});
+    const navigate = useNavigate();
+
+    const initialize = async () => {
+        const data = await getColumnData(editData.donorID);
+        setDonorInfo(data);
+    }
+
+    const handleFieldChange = (field) => (e) => {
+        setDonorInfo(prev => ({ ...prev, [field]: e.target.value ?? "" }))
+    }
+    const handleBack = () => {
+        navigate(-1); // Navigate back to the previous page
+    };
+    useEffect(() => {
+        initialize();
+    }, [editData]);
 
     return (
         <>
@@ -37,13 +80,13 @@ const Data2 = () => {
                         borderRadius: 1,
                         backgroundColor: '#F6FAFB',
                         margin: 2,
-                        marginTop: -26,
                         padding: 2,
                     }}>
                     <Card elevation={10}
                         sx={{
                             borderRadius: 3,
                             margin: 2,
+                            marginBottom: 22,
                             padding: 2
                         }}
                     >
@@ -55,7 +98,9 @@ const Data2 = () => {
                                 marginBottom: 6
                             }}
                         >
-                            <ArrowBack color='primary' />
+                            <Button onClick={handleBack}>
+                                <ArrowBack color='primary' />
+                            </Button>
                         </Box>
 
 
@@ -72,7 +117,7 @@ const Data2 = () => {
                                     ימים פעילים
                                 </Typography>
                                 <Typography variant='h4' color="primary" fontWeight={'bold'} textAlign={'right'} marginTop={3}>
-                                    1,000
+                                    {editData.totalDonation}
                                 </Typography>
                             </Card>
                             <Box sx={{ position: 'relative' }}>
@@ -105,6 +150,8 @@ const Data2 = () => {
                                         </Box>
                                         <Input
                                             sx={{ bgcolor: "#F1E6FF" }}
+                                            value={donorInfo.name}
+                                            onChange={handleFieldChange("name")}
                                         />
                                     </Box>
                                     <Box>
@@ -119,6 +166,8 @@ const Data2 = () => {
                                         </Box>
                                         <Input
                                             sx={{ bgcolor: "#F1E6FF" }}
+                                            value={donorInfo.email}
+                                            onChange={handleFieldChange("email")}
                                         />
                                     </Box>
                                 </Box>
@@ -139,6 +188,8 @@ const Data2 = () => {
                                         </Box>
                                         <Input
                                             sx={{ bgcolor: "#F1E6FF" }}
+                                            value={donorInfo.mothername}
+                                            onChange={handleFieldChange("motherName")}
                                         />
                                     </Box>
 
@@ -154,6 +205,8 @@ const Data2 = () => {
                                         </Box>
                                         <Input
                                             sx={{ bgcolor: "#F1E6FF" }}
+                                            value={donorInfo.phone}
+                                            onChange={handleFieldChange("phone")}
                                         />
                                     </Box>
                                 </Box>
@@ -186,4 +239,4 @@ const Data2 = () => {
 }
 
 
-export default Data2;
+export default Data4;

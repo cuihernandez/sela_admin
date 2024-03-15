@@ -1,12 +1,13 @@
-import React from 'react';
+import { React, useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import Avatar from '@mui/material/Avatar';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import Card from '@mui/material/Card';
 import Transfer from '../Transfer';
+import { useEditContext } from '../../EditContext';
+import { collection, getDocs, where, query } from "firebase/firestore/lite";
+import db from '../../firebase';
 const theme = createTheme({
     palette: {
         primary: {
@@ -18,8 +19,34 @@ const theme = createTheme({
 
     },
 });
+const getTransactionData = async (donorID) => {
+    const users = collection(db, 'transaction');
+    const q = query(users, where('donorID', '==', donorID));
+
+    try {
+        const querySnapshot = await getDocs(q);
+        let data = [];
+        querySnapshot.forEach((doc) => {
+            data.push(doc.data());
+        })
+        return data;
+    }
+    catch (error) {
+        console.error('Error is:', error);
+    }
+}
 
 const Data3 = () => {
+    const { editData } = useEditContext();
+    const [transactionData, setTransactionData] = useState({});
+    const initialize = async () => {
+        const data = await getTransactionData(editData.donorID);
+        setTransactionData(data);
+
+    }
+    useEffect(() => {
+        initialize();
+    }, [editData]);
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -48,20 +75,18 @@ const Data3 = () => {
                                         ימים פעילים
                                     </Typography>
                                 </Box>
+
                                 <Box border={1} borderColor={'#D6B7FF'} sx={{ margin: 2, borderRadius: 3, padding: 1 }}>
-                                    <Transfer price={-99} name={"יעקב"} />
-                                    <Transfer price={99.45} name={"Tom"} />
-                                    <Transfer price={-1229} name={"John"} />
-                                    <Transfer price={14299} name={"Andy"} />
-
-
+                                    {Array.isArray(transactionData) && transactionData.map((doc) => (
+                                        <Transfer key={doc.id} price={doc.transactionAmount} name={doc.doneeName} />
+                                    ))}
                                 </Box>
                                 <Box border={1} borderColor={'#D6B7FF'} sx={{ margin: 2, borderRadius: 3, padding: 2, paddingRight: 3 }}>
                                     <Typography variant='h6' color="primary" fontWeight="bold" textAlign={'right'}>
                                         ימים
                                     </Typography>
                                     <Typography variant='h5' color="primary" fontWeight="bold" textAlign={'right'}>
-                                        $30,100
+                                        ${editData.credit}
                                     </Typography>
                                 </Box>
                             </Card>

@@ -47,13 +47,13 @@ function RightAlignedContainer() {
                     }}>
                         <List sx={{ width: '100%' }}>
                             <ListItem button component={Link} to="/tabledonor" sx={ListItemStyle}>
-                                <ListItemText primary='DonorTable' />
+                                <ListItemText primary='משתמשים' />
                             </ListItem>
                             <ListItem button component={Link} to="/tabledonee" sx={ListItemStyle}>
-                                <ListItemText primary='DoneeTable' />
+                                <ListItemText primary='לקוחות' />
                             </ListItem>
                             <ListItem button component={Link} to="/edit" sx={ListItemStyle}>
-                                <ListItemText primary='Edit' />
+                                <ListItemText primary='מערכת' />
                             </ListItem>
                         </List>
                     </Box>
