@@ -178,7 +178,6 @@ function EnhancedTableToolbar(props) {
                     id="tableTitle"
                     component="div"
                 >
-                    מידע בוצ
                 </Typography>
             )}
 
@@ -267,80 +266,62 @@ export default function EnhancedTable() {
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
     const [visibleRows, setVisibleRows] = useState([]);
+
+
+
+    const getTableData = async () => {
+        const transactionsRef = collection(db, 'transaction');
+        const snapshot = await getDocs(transactionsRef);
+
+        let groupedTransactions = [];
+        snapshot.forEach(doc => {
+            const transaction = doc.data();
+            const key = `${transaction.doneeName}_${transaction.doneeEmail}_${transaction.donorID}`;
+
+            // Find the existing group in the array
+            let group = groupedTransactions.find(g => g.key === key);
+
+            if (!group) {
+                group = {
+                    id: groupedTransactions.length,
+                    name: transaction.doneeName,
+                    email: transaction.doneeEmail,
+                    donorID: transaction.donorID,
+                    totalDonation: 0,
+                    credit: 0,
+                    key: key // Store the key for identification
+                };
+                groupedTransactions.push(group);
+            }
+
+            group.totalDonation += transaction.transactionAmount;
+            group.credit++;
+        });
+
+        groupedTransactions.forEach(group => {
+            group.credit = group.totalDonation - (group.credit * 0.2);
+        });
+
+        setRows(groupedTransactions);
+        console.log("Table Data is ", groupedTransactions);
+    }
     useEffect(() => {
+        setVisibleRows(rows);
+    }, [rows]);
+    useEffect(() => {
+
+        getTableData();
+    }, []
+
+    );
+    useEffect(() => {
+        console.log('Rows data is---', rows);
         const updatedVisibleRows = stableSort(rows, getComparator(order, orderBy)).slice(
             page * rowsPerPage,
             page * rowsPerPage + rowsPerPage
         );
         setVisibleRows(updatedVisibleRows);
     }, [rows, order, orderBy, page, rowsPerPage]);
-
-    useEffect(() => {
-        setVisibleRows(rows);
-    }, [rows]);
-    useEffect(() => {
-        const dbLoad = () => {
-            const users = collection(db, 'transaction');
-            let arrays = [];
-            let idCounter = 0;
-            getDocs(users).then((querySnapshot) => {
-                const promises = [];
-                querySnapshot.forEach((doc) => {
-                    promises.push(countPrayTimeAndAmount(doc.data().donorID, doc.data().doneeName).then((response) => {
-                        let obj = {
-                            id: idCounter,
-                            donorID: response.donorID,
-                            name: response.doneeName,
-                            email: response.doneeEmail,
-                            totalDonation: response.totalDonation,
-                            credit: response.totalDonation - response.prayTime * 0.2, // Use the response from fetchCountValueByUserID
-                        };
-                        // console.log('response:   ', response);
-                        arrays.push(obj);
-                        idCounter++;
-                    }));
-                }
-                );
-
-                Promise.all(promises).then(() => {
-                    setRows(arrays);
-                });
-                return arrays;
-            }).catch((error) => {
-                console.error('Error getting documents: ', error);
-            });
-        }
-
-        const countPrayTimeAndAmount = async (donorId, name) => {
-            const userDataRef = collection(db, 'transaction');
-            const q = query(userDataRef, where('donorID', '==', donorId), where('doneeName', '==', name));
-            try {
-                const querySnapshot = await getDocs(q);
-                let prayTime = 0;
-                let totalDonation = 0;
-                let doneeEmail = '';
-                let doneeName = '';
-                let donorID = '';
-                querySnapshot.forEach((doc) => {
-                    const value = doc.data().transactionAmount;
-                    doneeName = doc.data().doneeName;
-                    doneeEmail = doc.data().doneeEmail;
-                    totalDonation += value;
-                    prayTime++;
-                    donorID = doc.data().donorID;
-
-                });
-                return { doneeName, doneeEmail, prayTime, totalDonation, donorID };
-
-            }
-            catch {
-
-            }
-        }
-        dbLoad();
-    }, []
-
-    );
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>

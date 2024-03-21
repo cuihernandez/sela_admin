@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import EditImage from '../../assets/Edit.png';
 import IconImage from '../../assets/splash_icon.png';
 import { useEditContext } from '../../EditContext';
-import { collection, getDocs } from "firebase/firestore/lite";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore/lite";
 import { db } from '../../firebase';
 const theme = createTheme({
     palette: {
@@ -26,6 +26,7 @@ const theme = createTheme({
 });
 
 
+
 const getColumnData = async (donorID) => {
     const users = collection(db, 'users');
     const querySnapshot = await getDocs(users);
@@ -33,7 +34,6 @@ const getColumnData = async (donorID) => {
     querySnapshot.forEach((doc) => {
         if (doc.id === donorID) { // Use === for comparison
             documentData = doc.data();
-
         }
         else {
             console.log('The data is not exist')
@@ -67,6 +67,21 @@ const Data4 = () => {
     const handleBack = () => {
         navigate(-1); // Navigate back to the previous page
     };
+
+    const updateUserData = async (donorID) => {
+        const docRef1 = doc(db, 'users', donorID);
+        try {
+            await updateDoc(docRef1, { name: donorInfo.name });
+            await updateDoc(docRef1, { mothername: donorInfo.mothername });
+            await updateDoc(docRef1, { email: donorInfo.email });
+            await updateDoc(docRef1, { phone: donorInfo.phone });
+            console.log('Document updated successfully');
+        }
+        catch { }
+    }
+    const handleButtonClick = () => {
+        updateUserData(editData.donorID);
+    }
     useEffect(() => {
         initialize();
     }, [editData]);
@@ -220,7 +235,9 @@ const Data4 = () => {
                                         borderRadius: 4,
 
                                     }
-                                }>שמור שינויים</Button>
+                                }
+                                    onClick={handleButtonClick}
+                                >שמור שינויים</Button>
                             </Box>
 
                         </Grid>

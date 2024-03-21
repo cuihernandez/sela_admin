@@ -172,7 +172,6 @@ function EnhancedTableToolbar(props) {
                     id="tableTitle"
                     component="div"
                 >
-                    מידע על דונר
                 </Typography>
             )}
 
@@ -318,6 +317,7 @@ export default function EnhancedTable() {
     };
     useEffect(() => {
         dbLoad();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []
     );
     return (

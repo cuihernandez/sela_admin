@@ -204,7 +204,7 @@ const Data1 = () => {
                                         }}>
                                         <Button sx={{ borderRadius: 4 }} type="submit" variant="contained">
                                             <AddIcon />
-                                            Add Button</Button>
+                                            הוסף חלון חדש</Button>
                                     </Box>
                                 </form>
                             </Box>

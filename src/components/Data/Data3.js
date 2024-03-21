@@ -84,7 +84,7 @@ const Data3 = () => {
                                 </Box>
                                 <Box border={1} borderColor={'#D6B7FF'} sx={{ margin: 2, borderRadius: 3, padding: 2, paddingRight: 3 }}>
                                     <Typography variant='h6' color="primary" fontWeight="bold" textAlign={'right'}>
-                                        ימים
+                                        balance
                                     </Typography>
                                     <Typography variant='h5' color="primary" fontWeight="bold" textAlign={'right'}>
                                         ${editData.credit}

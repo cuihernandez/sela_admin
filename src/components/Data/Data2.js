@@ -322,12 +322,24 @@ const Data2 = () => {
                                                         justifyContent: 'flex-end',
                                                         marginRight: 2,
                                                         padding: 2,
-                                                        paddingBottom: 4
+                                                        paddingBottom: 4,
+                                                        overflow: 'hidden'
                                                     }}>
-
-                                                        <Typography variant='body3' fontWeight={'bold'} >
+                                                        <TextField
+                                                            multiline
+                                                            variant='standard'
+                                                            InputProps={{ style: { borderBottom: "none" }, disableUnderline: true }}
+                                                            sx={{
+                                                                width: "100%",
+                                                                hegiht: "30%",
+                                                                bgcolor: '#F1E6FF',
+                                                            }}
+                                                            value={(item.text)}
+                                                            disabled={true}
+                                                        />
+                                                        {/* <Typography variant='body3' fontWeight={'bold'} >
                                                             {item.text}
-                                                        </Typography>
+                                                        </Typography> */}
                                                     </Box>
                                                 </Box>
                                             </Box>
