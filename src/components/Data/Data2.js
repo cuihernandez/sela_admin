@@ -43,7 +43,6 @@ const Data2 = () => {
             ));
             setNoticeText1(fetchData[0].text);
             setNoticeText2(fetchData[1].text);
-            console.log('this is my console', fetchData[0], fetchData[1])
             // setNoticeText2(fetchData.[1].data);
         };
         fetchData();

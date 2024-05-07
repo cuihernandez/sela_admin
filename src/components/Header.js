@@ -3,7 +3,29 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-export default function ButtonAppBar() {
+import { useLocation } from 'react-router-dom';
+export default function Header() {
+    const location = useLocation();
+
+    let headerText = '';
+
+    // Set header text based on the current route path
+    switch (location.pathname) {
+        case '/edit':
+            headerText = 'תורמים';
+            break;
+        case '/donors/:id':
+            headerText = 'תורמים פרטים אישיים';
+            break;
+        case '/tabledonee':
+            headerText = 'לקוחות';
+            break;
+        case '/tabledonor':
+            headerText = 'תורמים';
+            break;
+        default:
+            headerText = 'מתפללים';
+    }
     return (
         <Box
             sx={{
@@ -18,7 +40,7 @@ export default function ButtonAppBar() {
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         </Typography>
                         <Typography variant="h4" component="div" sx={{ color: '#560FC9' }}>
-                            משתמשים
+                            {headerText}
                         </Typography>
                     </Toolbar>
                 </AppBar>

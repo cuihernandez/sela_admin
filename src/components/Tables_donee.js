@@ -303,7 +303,6 @@ export default function EnhancedTable() {
         });
 
         setRows(groupedTransactions);
-        console.log("Table Data is ", groupedTransactions);
     }
     useEffect(() => {
         setVisibleRows(rows);

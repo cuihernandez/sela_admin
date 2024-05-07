@@ -103,6 +103,16 @@ const Data4 = () => {
                             padding: 2
                         }}
                     >
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            margin: 1,
+                            marginBottom: 0
+                        }}>
+                            <Typography variant='h4' color="primary" fontWeight="bold">
+                                פרטי התורם
+                            </Typography>
+                        </Box>
                         <Box
                             sx={{
                                 display: 'flex',
