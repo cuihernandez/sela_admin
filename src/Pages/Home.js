@@ -8,6 +8,8 @@ import Edit from '../components/Edit';
 import TableDonee from '../components/Tables_donee';
 import Donors from '../components/Donors';
 import {EditProvider} from '../EditContext';
+import HelpStudents from '../components/HelpStudents';
+import AddStudent from '../components/AddStudent';
 
 function Home() {
   const navigate = useNavigate();
@@ -44,6 +46,11 @@ function Home() {
                       <Route path="/donors/:id" element={<Donors />} />
                       <Route path="/tabledonee" element={<TableDonee />} />
                       <Route path="/tabledonor" element={<TablesDoner />} />
+                      <Route path="/help-students" element={<HelpStudents />} />
+                      <Route
+                        path="/help-students/new"
+                        element={<AddStudent />}
+                      />
                     </Routes>
                   </EditProvider>
                 </Box>
