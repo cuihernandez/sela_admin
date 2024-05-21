@@ -66,6 +66,8 @@ function Home() {
 
 const boxStyle = {
   bgcolor: '#560FC9',
+  height: '100vh',
+  overflow: 'auto',
 };
 
 const containerBoxStyle = {

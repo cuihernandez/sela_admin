@@ -25,6 +25,7 @@ import {collection, getDocs, query, where} from 'firebase/firestore/lite';
 import {db} from '../firebase';
 import {useNavigate} from 'react-router-dom';
 import {useEditContext} from '../EditContext';
+import {RotateLeft} from '@mui/icons-material';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -213,6 +214,7 @@ export default function EnhancedTable() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -265,39 +267,46 @@ export default function EnhancedTable() {
   const [visibleRows, setVisibleRows] = useState([]);
 
   const getTableData = async () => {
-    const transactionsRef = collection(db, 'transaction');
-    const snapshot = await getDocs(transactionsRef);
+    try {
+      setLoading(true);
+      const transactionsRef = collection(db, 'transaction');
+      const snapshot = await getDocs(transactionsRef);
 
-    let groupedTransactions = [];
-    snapshot.forEach(doc => {
-      const transaction = doc.data();
-      const key = `${transaction.doneeName}_${transaction.doneeEmail}_${transaction.donorID}`;
+      let groupedTransactions = [];
+      snapshot.forEach(doc => {
+        const transaction = doc.data();
+        const key = `${transaction.doneeName}_${transaction.doneeEmail}_${transaction.donorID}`;
 
-      // Find the existing group in the array
-      let group = groupedTransactions.find(g => g.key === key);
+        // Find the existing group in the array
+        let group = groupedTransactions.find(g => g.key === key);
 
-      if (!group) {
-        group = {
-          id: groupedTransactions.length,
-          name: transaction.doneeName,
-          email: transaction.doneeEmail,
-          donorID: transaction.donorID,
-          totalDonation: 0,
-          credit: 0,
-          key: key, // Store the key for identification
-        };
-        groupedTransactions.push(group);
-      }
+        if (!group) {
+          group = {
+            id: groupedTransactions.length,
+            name: transaction.doneeName,
+            email: transaction.doneeEmail,
+            donorID: transaction.donorID,
+            totalDonation: 0,
+            credit: 0,
+            key: key, // Store the key for identification
+          };
+          groupedTransactions.push(group);
+        }
 
-      group.totalDonation += transaction.transactionAmount;
-      group.credit++;
-    });
+        group.totalDonation += transaction.transactionAmount;
+        group.credit++;
+      });
 
-    groupedTransactions.forEach(group => {
-      group.credit = group.totalDonation - group.credit * 0.2;
-    });
+      groupedTransactions.forEach(group => {
+        group.credit = group.totalDonation - group.credit * 0.2;
+      });
 
-    setRows(groupedTransactions);
+      setRows(groupedTransactions);
+    } catch (error) {
+      console.error('GET_DONEE_DATA: ', error);
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
     setVisibleRows(rows);
@@ -331,57 +340,72 @@ export default function EnhancedTable() {
               rowCount={rows.length}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
-
-                return (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{cursor: 'pointer'}}>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
-                      align="right">
-                      <Button onClick={() => handleDonorClick(row)}>
-                        <img
-                          src={EditImage}
-                          alt="edit"
-                          style={{width: 15, height: 15}}
-                        />
-                      </Button>
-                    </TableCell>
-                    <TableCell align="right">{row.credit}</TableCell>
-                    <TableCell align="right">{row.totalDonation}</TableCell>
-                    <TableCell align="right">{row.email}</TableCell>
-                    <TableCell align="right">{row.name}</TableCell>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        onChange={event => handleClick(event, row.id)}
-                        checked={isItemSelected}
-                        inputProps={{
-                          'aria-labelledby': labelId,
-                        }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: 53 * emptyRows,
+              {loading ? (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '4rem',
+                    width: '100%',
                   }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
+                  <RotateLeft className="spinner" sx={{fill: '#560FC9'}} />
+                </Box>
+              ) : (
+                <>
+                  {visibleRows.map((row, index) => {
+                    const isItemSelected = isSelected(row.id);
+                    const labelId = `enhanced-table-checkbox-${index}`;
+
+                    return (
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.id}
+                        selected={isItemSelected}
+                        sx={{cursor: 'pointer'}}>
+                        <TableCell
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          padding="none"
+                          align="right">
+                          <Button onClick={() => handleDonorClick(row)}>
+                            <img
+                              src={EditImage}
+                              alt="edit"
+                              style={{width: 15, height: 15}}
+                            />
+                          </Button>
+                        </TableCell>
+                        <TableCell align="right">{row.credit}</TableCell>
+                        <TableCell align="right">{row.totalDonation}</TableCell>
+                        <TableCell align="right">{row.email}</TableCell>
+                        <TableCell align="right">{row.name}</TableCell>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            color="primary"
+                            onChange={event => handleClick(event, row.id)}
+                            checked={isItemSelected}
+                            inputProps={{
+                              'aria-labelledby': labelId,
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow
+                      style={{
+                        height: 53 * emptyRows,
+                      }}>
+                      <TableCell colSpan={6} />
+                    </TableRow>
+                  )}
+                </>
               )}
             </TableBody>
           </Table>

@@ -116,6 +116,8 @@ const Data1 = () => {
       if (endDate) {
         await setDoc(docRefEnd, {time: endDate}, {merge: true});
       }
+
+      alert('Date set successfully');
     } catch (error) {
       console.error('error is :', error);
     } finally {

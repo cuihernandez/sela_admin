@@ -91,6 +91,12 @@ const headCells = [
     disablePadding: false,
     label: 'שם מלא',
   },
+  {
+    id: 'photo',
+    numeric: true,
+    disablePadding: false,
+    label: 'תמונה',
+  },
 ];
 
 function EnhancedTableHead(props) {
@@ -221,7 +227,8 @@ EnhancedTableToolbar.propTypes = {
 export default function HelpStudents() {
   const navigate = useNavigate();
   const {updateEditData} = useEditContext();
-  const handleStudentClick = async studentId => {
+
+  const handleStudentDelete = async studentId => {
     // updateEditData(rowData);
     // navigate(`/donors/${rowData.id}`);
     console.log({studentId, db});
@@ -304,7 +311,9 @@ export default function HelpStudents() {
     let groupedStudents = [];
     snapshot.forEach(doc => {
       const student = doc.data();
-      const key = `${student.name}_${student.phone}_${student.id}`;
+
+      console.log({student});
+      const key = `${student.name}_${student.phone}_${student.photo}`;
 
       // Find the existing group in the array
       let group = groupedStudents.find(g => g.key === key);
@@ -314,6 +323,7 @@ export default function HelpStudents() {
           id: doc.id,
           name: student.name,
           phone: student.phone,
+          photo: student.photo,
           key: key, // Store the key for identification
         };
         groupedStudents.push(group);
@@ -366,6 +376,8 @@ export default function HelpStudents() {
                 const isItemSelected = isSelected(row.id);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
+                console.log({row});
+
                 return (
                   <TableRow
                     hover
@@ -381,7 +393,7 @@ export default function HelpStudents() {
                       scope="row"
                       padding="none"
                       align="right">
-                      <IconButton onClick={() => handleStudentClick(row.id)}>
+                      <IconButton onClick={() => handleStudentDelete(row.id)}>
                         <DeleteOutlineOutlined
                           //   color="#560FC9"
                           sx={{fill: '#560FC9'}}
@@ -392,6 +404,27 @@ export default function HelpStudents() {
                     <TableCell align="right">{row.totalDonation}</TableCell> */}
                     <TableCell align="right">{row.phone}</TableCell>
                     <TableCell align="right">{row.name}</TableCell>
+                    <TableCell align="right">
+                      <Box
+                        sx={{
+                          borderRadius: '100%',
+                          width: '2.5rem',
+                          height: '2.5rem',
+                          overflow: 'clip',
+                          backgroundColor: '#560FC9',
+                          marginLeft: 'auto',
+                        }}>
+                        <img
+                          src={row.photo}
+                          style={{
+                            objectFit: 'cover',
+                            width: '100%',
+                            height: '100%',
+                          }}
+                        />
+                      </Box>
+                      {/* {row.photo || row.name} */}
+                    </TableCell>
                     <TableCell padding="checkbox">
                       <Checkbox
                         color="primary"
