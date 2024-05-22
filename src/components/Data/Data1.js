@@ -3,19 +3,16 @@ import Typography from '@mui/material/Typography';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import {TextField} from '@mui/material';
+import {TextField, makeStyles} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import {Delete} from '@mui/icons-material';
+import {Delete, RotateLeft} from '@mui/icons-material';
 import {Button} from '@mui/material';
 import Card from '@mui/material/Card';
 import {useForm} from 'react-hook-form';
 import dayjs from 'dayjs';
 import {DemoContainer} from '@mui/x-date-pickers/internals/demo';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
-import {SingleInputDateTimeRangeField} from '@mui/x-date-pickers-pro/SingleInputDateTimeRangeField';
-
 import {
   collection,
   addDoc,
@@ -28,6 +25,7 @@ import {
 import {onSnapshot} from 'firebase/firestore';
 import {db} from '../../firebase';
 import {DatePicker} from '@mui/x-date-pickers';
+import classes from './data.module.css';
 
 const theme = createTheme({
   palette: {
@@ -43,10 +41,13 @@ const theme = createTheme({
 const Data1 = () => {
   const {register, handleSubmit, reset} = useForm();
   const [items, setItems] = useState([]);
-  const [value, setValue] = useState([
-    dayjs('2024-03-01T15:30'),
-    dayjs('2024-04-01T18:30'),
-  ]);
+
+  const [loading, setLoading] = useState({date: false});
+
+  const [startDate, setStartDate] = useState(dayjs('2024-03-01T15:30'));
+
+  const [endDate, setEndDate] = useState(dayjs('2024-04-01T18:30'));
+
   useEffect(() => {
     const fetchData = async () => {
       const querySnapshot = await getDocs(collection(db, 'psalms'));
@@ -67,7 +68,8 @@ const Data1 = () => {
       if (docStartSnapshot.exists() && docEndSnapshot.exists()) {
         const startTime = dayjs(docStartSnapshot.data().time.toDate()); // Convert Firestore timestamp to dayjs
         const endTime = dayjs(docEndSnapshot.data().time.toDate()); // Convert Firestore timestamp to dayjs
-        setValue([startTime, endTime]); // Update state
+        setStartDate(startTime);
+        setEndDate(endDate);
         console.log('startTime:', startTime, 'end time is', endTime);
       } else {
         console.log('One or both documents do not exist.');
@@ -105,18 +107,21 @@ const Data1 = () => {
   const handleChange = async newValue => {
     const docRefStart = doc(db, 'mobileStatus', 'startTime');
     const docRefEnd = doc(db, 'mobileStatus', 'endTime');
-    setValue(newValue);
-    const startTime = newValue[0]?.$d ? new Date(newValue[0].$d) : null;
-    const endTime = newValue[1]?.$d ? new Date(newValue[1].$d) : null;
+    setLoading(prev => ({...prev, date: true}));
+
     try {
-      if (startTime) {
-        await setDoc(docRefStart, {time: startTime}, {merge: true});
+      if (startDate) {
+        await setDoc(docRefStart, {time: startDate}, {merge: true});
       }
-      if (endTime) {
-        await setDoc(docRefEnd, {time: endTime}, {merge: true});
+      if (endDate) {
+        await setDoc(docRefEnd, {time: endDate}, {merge: true});
       }
+
+      alert('Date set successfully');
     } catch (error) {
       console.error('error is :', error);
+    } finally {
+      setLoading(prev => ({...prev, date: false}));
     }
   };
   // const handleButtonClick = () => {
@@ -168,32 +173,63 @@ const Data1 = () => {
                   ימים פעילים
                 </Typography>
               </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center', // Center content horizontally
-                  alignItems: 'center', // Center content vertically
-                  // width: '100%',
-                  padding: 2, // Add some padding
-                }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  {/* <DemoContainer
-                    components={[
-                      'SingleInputDateTimeRangeField',
-                      'SingleInputDateTimeRangeField',
-                    ]}>
-                    <SingleInputDateTimeRangeField
-                      label="Holiday Setting"
-                      value={value}
-                      onChange={handleChange}
-                    /> */}
-                  {/* </DemoContainer> */}
-                  <DatePicker
-                    value={value}
-                    onChange={handleChange}
-                    label="Holiday Setting"
-                  />
-                </LocalizationProvider>
+              <Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center', // Center content horizontally
+                    alignItems: 'center', // Center content vertically
+                    // width: '100%',
+                    padding: 2, // Add some padding
+                  }}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    {/* <DemoContainer
+                      components={[
+                        'SingleInputDateTimeRangeField',
+                        'SingleInputDateTimeRangeField',
+                      ]}>
+                      <SingleInputDateTimeRangeField
+                        label="Holiday Setting"
+                        value={value}
+                        onChange={handleChange}
+                      />
+                    </DemoContainer> */}
+                    <div>
+                      <div style={{marginBottom: '0.5rem'}}>
+                        <label>Holiday Setting</label>
+                      </div>
+                      <DatePicker
+                        value={startDate}
+                        onChange={e => {
+                          // console.log({e});
+                          if (e?.$d) setStartDate(new Date(e.$d));
+                        }}
+                        label="Start Date"
+                      />
+                      <Box sx={{marginTop: '1rem'}}>
+                        <DatePicker
+                          value={endDate}
+                          onChange={e => {
+                            if (e?.$d) setEndDate(new Date(e.$d));
+                          }}
+                          label="End Date"
+                        />
+                      </Box>
+                    </div>
+                  </LocalizationProvider>
+                </Box>
+                <Box
+                  sx={{
+                    width: 'fit-content',
+                    marginRight: 'auto',
+                    marginLeft: 'auto',
+                    width: '85%',
+                  }}>
+                  <Button onClick={handleChange} variant="contained" fullWidth>
+                    Confirm
+                    {loading.date && <RotateLeft className={classes.spinner} />}
+                  </Button>
+                </Box>
               </Box>
               <Box
                 sx={{

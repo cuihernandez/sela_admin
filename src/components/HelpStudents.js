@@ -1,7 +1,6 @@
-import * as React from 'react';
 import {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {alpha} from '@mui/material/styles';
+import {alpha, createTheme} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -19,8 +18,31 @@ import IconButton from '@mui/material/IconButton';
 import {visuallyHidden} from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
+import Button from '@mui/material/Button';
+import EditImage from '../assets/Edit_btn_icon.png';
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore/lite';
 import {db} from '../firebase';
-import {collection, getDocs, query, where} from 'firebase/firestore/lite';
+import {Link, useNavigate} from 'react-router-dom';
+import {useEditContext} from '../EditContext';
+import {AddOutlined, DeleteOutlineOutlined, PlusOne} from '@mui/icons-material';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#560FC9',
+    },
+    secondary: {
+      main: '#FFFFFF',
+    },
+  },
+});
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -52,34 +74,28 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: 'dateToChoose',
-    numeric: false,
-    disablePadding: true,
-    label: 'תאריך לבחירה',
-  },
-  {
-    id: 'activeTimes',
+    id: 'delete',
     numeric: true,
     disablePadding: false,
-    label: 'השלמתי תפילתי ',
+    label: '',
   },
   {
-    id: 'lastDate',
+    id: 'phone',
     numeric: true,
     disablePadding: false,
-    label: 'תאריך אחרון',
-  },
-  {
-    id: 'email',
-    numeric: true,
-    disablePadding: false,
-    label: 'אימייל',
+    label: 'מספר טלפון',
   },
   {
     id: 'name',
     numeric: true,
     disablePadding: false,
     label: 'שם מלא',
+  },
+  {
+    id: 'photo',
+    numeric: true,
+    disablePadding: false,
+    label: 'תמונה',
   },
 ];
 
@@ -102,7 +118,7 @@ function EnhancedTableHead(props) {
         {headCells.map(headCell => (
           <TableCell
             key={headCell.id}
-            align="right"
+            align={headCell.numeric ? 'right' : 'left'}
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}>
             <TableSortLabel
@@ -172,7 +188,20 @@ function EnhancedTableToolbar(props) {
           sx={{flex: '1 1 100%'}}
           variant="h6"
           id="tableTitle"
-          component="div"></Typography>
+          component="div">
+          {/* Okay */}
+
+          <Link to="new">
+            <IconButton>
+              <AddOutlined
+                sx={{
+                  width: 30,
+                  fill: '#560FC9',
+                }}
+              />
+            </IconButton>
+          </Link>
+        </Typography>
       )}
 
       <Paper
@@ -195,13 +224,35 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
-  const [rows, setRows] = React.useState([]);
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+export default function HelpStudents() {
+  const navigate = useNavigate();
+  const {updateEditData} = useEditContext();
+
+  const handleStudentDelete = async studentId => {
+    // updateEditData(rowData);
+    // navigate(`/donors/${rowData.id}`);
+    console.log({studentId, db});
+
+    try {
+      // Reference to the document
+
+      const docRef = doc(db, 'students', studentId); // Replace 'collectionName' with your collection name
+
+      // Delete the document
+      await deleteDoc(docRef);
+
+      console.log('Document successfully deleted');
+      getTableData();
+    } catch (e) {
+      console.error('Error deleting document: ', e);
+    }
+  };
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('calories');
+  const [selected, setSelected] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rows, setRows] = useState([]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -251,9 +302,51 @@ export default function EnhancedTable() {
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
   const [visibleRows, setVisibleRows] = useState([]);
+
+  const getTableData = async () => {
+    const studentsRef = collection(db, 'students');
+    const snapshot = await getDocs(studentsRef);
+
+    let groupedStudents = [];
+    snapshot.forEach(doc => {
+      const student = doc.data();
+
+      console.log({student});
+      const key = `${student.name}_${student.phone}_${student.photo}`;
+
+      // Find the existing group in the array
+      let group = groupedStudents.find(g => g.key === key);
+
+      if (!group) {
+        group = {
+          id: doc.id,
+          name: student.name,
+          phone: student.phone,
+          photo: student.photo,
+          key: key, // Store the key for identification
+        };
+        groupedStudents.push(group);
+      }
+
+      group.totalDonation += student.studentAmount;
+      group.credit++;
+    });
+
+    groupedStudents.forEach(group => {
+      group.credit = group.totalDonation - group.credit * 0.2;
+    });
+
+    setRows(groupedStudents);
+  };
   useEffect(() => {
+    setVisibleRows(rows);
+  }, [rows]);
+  useEffect(() => {
+    getTableData();
+  }, []);
+  useEffect(() => {
+    console.log('Rows data is---', rows);
     const updatedVisibleRows = stableSort(
       rows,
       getComparator(order, orderBy),
@@ -261,69 +354,6 @@ export default function EnhancedTable() {
     setVisibleRows(updatedVisibleRows);
   }, [rows, order, orderBy, page, rowsPerPage]);
 
-  useEffect(() => {
-    setVisibleRows(rows);
-  }, [rows]);
-  const dbLoad = () => {
-    const users = collection(db, 'users');
-    let arrays = [];
-    let idCounter = 0;
-    getDocs(users)
-      .then(querySnapshot => {
-        const promises = [];
-        querySnapshot.forEach(doc => {
-          promises.push(
-            fetchCountValueByUserID(doc.id).then(response => {
-              const timestamp = doc.data().registertime; // Assuming this is the timestamp value
-              const date = new Date(timestamp);
-              const formattedDate = `${('0' + date.getDate()).slice(-2)}/${(
-                '0' +
-                (date.getMonth() + 1)
-              ).slice(-2)}/${date.getFullYear()}`;
-              let obj = {
-                id: idCounter,
-                userId: doc.id,
-                name: doc.data().name,
-                email: doc.data().email,
-                lastDate: formattedDate,
-                activeTimes: response, // Use the response from fetchCountValueByUserID
-                dateToChoose: formattedDate,
-              };
-              arrays.push(obj);
-              idCounter++;
-            }),
-          );
-        });
-
-        Promise.all(promises).then(() => {
-          setRows(arrays);
-        });
-        return arrays;
-      })
-      .catch(error => {
-        console.error('Error getting documents: ', error);
-      });
-  };
-  const fetchCountValueByUserID = async userID => {
-    const userDataRef = collection(db, 'userData');
-    const q = query(userDataRef, where('userID', '==', userID));
-
-    try {
-      const querySnapshot = await getDocs(q);
-      let values = 0;
-      querySnapshot.forEach(doc => {
-        const value = doc.data().completeCount;
-        values = value;
-      });
-      return values;
-    } catch (error) {
-      console.error('Error getting documents: ', error);
-    }
-  };
-  useEffect(() => {
-    dbLoad();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   return (
     <Box sx={{width: '100%'}}>
       <Paper sx={{width: '100%', mb: 2}}>
@@ -346,29 +376,59 @@ export default function EnhancedTable() {
                 const isItemSelected = isSelected(row.id);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
+                console.log({row});
+
                 return (
                   <TableRow
                     hover
-                    // onClick={(event) => handleClick(event, row.id)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
                     key={row.id}
                     selected={isItemSelected}
                     sx={{cursor: 'pointer'}}>
-                    <TableCell align="right">{row.dateToChoose}</TableCell>
-                    <TableCell align="right">{row.activeTimes}</TableCell>
-                    <TableCell align="right">{row.lastDate}</TableCell>
-                    <TableCell align="right">{row.email}</TableCell>
-                    <TableCell align="right">{row.name}</TableCell>
                     <TableCell
-                      padding="checkbox"
                       component="th"
                       id={labelId}
-                      scope="row">
+                      scope="row"
+                      padding="none"
+                      align="right">
+                      <IconButton onClick={() => handleStudentDelete(row.id)}>
+                        <DeleteOutlineOutlined
+                          //   color="#560FC9"
+                          sx={{fill: '#560FC9'}}
+                        />
+                      </IconButton>
+                    </TableCell>
+                    {/* <TableCell align="right">{row.credit}</TableCell>
+                    <TableCell align="right">{row.totalDonation}</TableCell> */}
+                    <TableCell align="right">{row.phone}</TableCell>
+                    <TableCell align="right">{row.name}</TableCell>
+                    <TableCell align="right">
+                      <Box
+                        sx={{
+                          borderRadius: '100%',
+                          width: '2.5rem',
+                          height: '2.5rem',
+                          overflow: 'clip',
+                          backgroundColor: '#560FC9',
+                          marginLeft: 'auto',
+                        }}>
+                        <img
+                          src={row.photo}
+                          style={{
+                            objectFit: 'cover',
+                            width: '100%',
+                            height: '100%',
+                          }}
+                        />
+                      </Box>
+                      {/* {row.photo || row.name} */}
+                    </TableCell>
+                    <TableCell padding="checkbox">
                       <Checkbox
-                        onChange={event => handleClick(event, row.id)}
                         color="primary"
+                        onChange={event => handleClick(event, row.id)}
                         checked={isItemSelected}
                         inputProps={{
                           'aria-labelledby': labelId,

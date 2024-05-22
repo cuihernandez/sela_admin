@@ -59,6 +59,13 @@ function RightAlignedContainer() {
               <ListItem button component={Link} to="/edit" sx={ListItemStyle}>
                 <ListItemText primary="מערכת" />
               </ListItem>
+              <ListItem
+                button
+                component={Link}
+                to="/help-students"
+                sx={ListItemStyle}>
+                <ListItemText primary="עזרו לתלמידים" />
+              </ListItem>
             </List>
           </Box>
         </Box>
