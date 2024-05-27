@@ -3,14 +3,13 @@ import Typography from '@mui/material/Typography';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import {TextField, makeStyles} from '@mui/material';
+import {TextField} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import {Delete, RotateLeft} from '@mui/icons-material';
 import {Button} from '@mui/material';
 import Card from '@mui/material/Card';
 import {useForm} from 'react-hook-form';
 import dayjs from 'dayjs';
-import {DemoContainer} from '@mui/x-date-pickers/internals/demo';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {
@@ -22,7 +21,6 @@ import {
   setDoc,
   getDoc,
 } from 'firebase/firestore/lite';
-import {onSnapshot} from 'firebase/firestore';
 import {db} from '../../firebase';
 import {DatePicker} from '@mui/x-date-pickers';
 import classes from './data.module.css';
@@ -77,7 +75,7 @@ const Data1 = () => {
     };
 
     fetchDateData();
-  }, []);
+  }, [endDate]);
 
   const onSubmit = async formData => {
     try {
@@ -220,7 +218,7 @@ const Data1 = () => {
                 </Box>
                 <Box
                   sx={{
-                    width: 'fit-content',
+                    // width: 'fit-content',
                     marginRight: 'auto',
                     marginLeft: 'auto',
                     width: '85%',

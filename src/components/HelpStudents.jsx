@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {alpha, createTheme} from '@mui/material/styles';
+import {alpha} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,31 +18,21 @@ import IconButton from '@mui/material/IconButton';
 import {visuallyHidden} from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
-import Button from '@mui/material/Button';
-import EditImage from '../assets/Edit_btn_icon.png';
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  deleteDoc,
-  doc,
-} from 'firebase/firestore/lite';
+import {collection, getDocs, deleteDoc, doc} from 'firebase/firestore/lite';
 import {db} from '../firebase';
-import {Link, useNavigate} from 'react-router-dom';
-import {useEditContext} from '../EditContext';
-import {AddOutlined, DeleteOutlineOutlined, PlusOne} from '@mui/icons-material';
+import {Link} from 'react-router-dom';
+import {AddOutlined, DeleteOutlineOutlined} from '@mui/icons-material';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#560FC9',
-    },
-    secondary: {
-      main: '#FFFFFF',
-    },
-  },
-});
+// const theme = createTheme({
+//   palette: {
+//     primary: {
+//       main: '#560FC9',
+//     },
+//     secondary: {
+//       main: '#FFFFFF',
+//     },
+//   },
+// });
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -225,9 +215,6 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function HelpStudents() {
-  const navigate = useNavigate();
-  const {updateEditData} = useEditContext();
-
   const handleStudentDelete = async studentId => {
     // updateEditData(rowData);
     // navigate(`/donors/${rowData.id}`);
@@ -415,6 +402,7 @@ export default function HelpStudents() {
                           marginLeft: 'auto',
                         }}>
                         <img
+                          alt={`student ${row.name.split(' ')[0]}`}
                           src={row.photo}
                           style={{
                             objectFit: 'cover',
