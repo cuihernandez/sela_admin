@@ -1,0 +1,23 @@
+.authInputField {
+  outline: none;
+  border: none;
+}
+
+.authInputField * {
+  border-radius: 30px !important;
+}
+
+.authInputField input:focus {
+  outline: none !important;
+  border: none !important;
+  outline-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.authInputField input {
+  outline: none !important;
+  border: none !important;
+  outline-color: transparent !important;
+  border-color: transparent !important;
+  border-radius: 30px !important;
+}
