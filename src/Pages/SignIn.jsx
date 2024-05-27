@@ -10,9 +10,19 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import backgroundImage from '../assets/bg.png';
 import {auth} from '../firebase';
 import {signInWithEmailAndPassword} from 'firebase/auth';
+import styles from './styles.module.css';
 
 // TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#560FC9',
+    },
+    secondary: {
+      main: '#FFFFFF',
+    },
+  },
+});
 const useStyles = makeStyles({
   root: {
     backgroundImage: `url(${backgroundImage})`,
@@ -55,7 +65,7 @@ export default function SignIn() {
   };
   return (
     <div className={classes.root}>
-      <ThemeProvider theme={defaultTheme}>
+      <ThemeProvider theme={theme}>
         <Container
           component="main"
           maxWidth="xs"
@@ -86,8 +96,15 @@ export default function SignIn() {
                 margin="normal"
                 required
                 fullWidth
+                className={styles.authInputField}
                 name="email"
-                style={{borderRadius: 30, backgroundColor: '#F1E6FF'}}
+                style={{
+                  borderRadius: 30,
+                  backgroundColor: '#F1E6FF',
+                  border: 'none',
+                  outline: 'none',
+                  overflow: 'clip',
+                }}
                 placeholder="אימייל"
                 value={email}
                 onChange={handleEmail}
@@ -96,13 +113,16 @@ export default function SignIn() {
                 margin="normal"
                 required
                 fullWidth
+                className={styles.authInputField}
                 name="password"
                 type="password"
                 placeholder="סיסמה"
                 style={{
                   borderRadius: 30,
                   backgroundColor: '#F1E6FF',
+                  outline: 'none',
                   border: 'none',
+                  overflow: 'clip',
                 }}
                 value={password}
                 onChange={handlePassword}
@@ -110,7 +130,7 @@ export default function SignIn() {
               <Button
                 fullWidth
                 variant="contained"
-                sx={{mt: 3, mb: 2}}
+                sx={{mt: 3, mb: 2, borderRadius: 30, padding: '1rem 0'}}
                 onClick={handleSignIn}>
                 החל מסנן
               </Button>
