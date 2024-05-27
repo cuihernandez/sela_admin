@@ -21,7 +21,7 @@ import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import Button from '@mui/material/Button';
 import EditImage from '../assets/Edit_btn_icon.png';
-import {collection, getDocs, query, where} from 'firebase/firestore/lite';
+import {collection, getDocs} from 'firebase/firestore/lite';
 import {db} from '../firebase';
 import {useNavigate} from 'react-router-dom';
 import {useEditContext} from '../EditContext';
@@ -62,6 +62,13 @@ const headCells = [
     disablePadding: false,
     label: '',
   },
+
+  // {
+  //   id: 'delete',
+  //   numeric: true,
+  //   disablePadding: false,
+  //   label: '',
+  // },
 
   {
     id: 'credit',

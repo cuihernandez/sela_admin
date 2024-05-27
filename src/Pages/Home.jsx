@@ -17,7 +17,7 @@ function Home() {
     const accessToken = localStorage.getItem('token');
     console.log({accessToken});
     if (!accessToken) navigate('/signin');
-  }, []);
+  }, [navigate]);
 
   return (
     <Box sx={boxStyle}>
@@ -46,7 +46,12 @@ function Home() {
                       <Route path="/edit" element={<Edit />} />
                       <Route path="/donors/:id" element={<Donors />} />
                       <Route path="/tabledonee" element={<TableDonee />} />
-                      <Route path="/tabledonor" element={<TablesDoner />} />
+                      <Route index path="/" element={<TablesDoner />} />
+                      <Route
+                        index
+                        path="/tabledonor"
+                        element={<TablesDoner />}
+                      />
                       <Route path="/help-students" element={<HelpStudents />} />
                       <Route
                         path="/help-students/new"
