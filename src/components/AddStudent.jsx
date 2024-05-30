@@ -53,7 +53,13 @@ export default function AddStudent() {
       const colRef = collection(db, 'students');
 
       // Add the document with auto-generated ID
-      const docRef = await addDoc(colRef, {name, phone, photo: imageUrl});
+      const docRef = await addDoc(colRef, {
+        name,
+        phone,
+        photo: imageUrl,
+        inView: false,
+        sponsor: '',
+      });
 
       console.log({docRef});
 
