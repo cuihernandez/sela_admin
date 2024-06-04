@@ -38,7 +38,7 @@ const getColumnData = async donorID => {
   });
 
   if (documentData) {
-    // console.log('Document data:', documentData);
+    console.log('Document data:', documentData);
   } else {
     console.log('No document found with that ID.');
   }
@@ -189,7 +189,9 @@ const Data4 = () => {
                       </Typography>
                     </Box>
                     <Input
-                      sx={{bgcolor: '#F1E6FF'}}
+                      sx={{
+                        bgcolor: '#F1E6FF',
+                      }}
                       value={donorInfo.name}
                       onChange={handleFieldChange('name')}
                     />
@@ -209,7 +211,9 @@ const Data4 = () => {
                       </Typography>
                     </Box>
                     <Input
-                      sx={{bgcolor: '#F1E6FF'}}
+                      sx={{
+                        bgcolor: '#F1E6FF',
+                      }}
                       value={donorInfo.email}
                       onChange={handleFieldChange('email')}
                     />
@@ -234,7 +238,9 @@ const Data4 = () => {
                       </Typography>
                     </Box>
                     <Input
-                      sx={{bgcolor: '#F1E6FF'}}
+                      sx={{
+                        bgcolor: '#F1E6FF',
+                      }}
                       value={donorInfo.mothername}
                       onChange={handleFieldChange('motherName')}
                     />
