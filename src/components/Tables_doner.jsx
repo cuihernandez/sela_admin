@@ -39,6 +39,7 @@ function getComparator(order, orderBy) {
 }
 
 function stableSort(array, comparator) {
+  console.log('INPUT_ARRAY: ', array);
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -47,7 +48,9 @@ function stableSort(array, comparator) {
     }
     return a[1] - b[1];
   });
-  return stabilizedThis.map(el => el[0]);
+  const result = stabilizedThis.map(el => el[0]);
+  console.log({result});
+  return result;
 }
 
 const headCells = [
@@ -285,6 +288,7 @@ export default function EnhancedTable() {
                 userId: doc.id,
                 name: doc.data().name,
                 email: doc.data().email,
+                deleted: doc.data().deleted,
                 lastDate: formattedDate,
                 activeTimes: response, // Use the response from fetchCountValueByUserID
                 dateToChoose: formattedDate,
@@ -324,6 +328,15 @@ export default function EnhancedTable() {
     dbLoad();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    console.log('ROWS: ', rows);
+  }, [rows]);
+
+  useEffect(() => {
+    console.log('VISIBLE_ROWS: ', visibleRows);
+  }, [visibleRows]);
+
   return (
     <Box sx={{width: '100%'}}>
       <Paper sx={{width: '100%', mb: 2}}>
@@ -356,11 +369,46 @@ export default function EnhancedTable() {
                     key={row.id}
                     selected={isItemSelected}
                     sx={{cursor: 'pointer'}}>
-                    <TableCell align="right">{row.dateToChoose}</TableCell>
-                    <TableCell align="right">{row.activeTimes}</TableCell>
-                    <TableCell align="right">{row.lastDate}</TableCell>
-                    <TableCell align="right">{row.email}</TableCell>
-                    <TableCell align="right">{row.name}</TableCell>
+                    <TableCell align="right">
+                      <p
+                        style={{
+                          color: row.deleted === true && '#FF0000',
+                        }}>
+                        {row.dateToChoose}
+                      </p>
+                    </TableCell>
+                    <TableCell align="right">
+                      <p
+                        style={{
+                          color: row.deleted === true && '#FF0000',
+                        }}>
+                        {row.activeTimes}
+                      </p>
+                    </TableCell>
+                    <TableCell align="right">
+                      <p
+                        style={{
+                          color: row.deleted === true && '#FF0000',
+                        }}>
+                        {row.lastDate}
+                      </p>
+                    </TableCell>
+                    <TableCell align="right">
+                      <p
+                        style={{
+                          color: row.deleted === true && '#FF0000',
+                        }}>
+                        {row.email}
+                      </p>
+                    </TableCell>
+                    <TableCell align="right">
+                      <p
+                        style={{
+                          color: row.deleted === true && '#FF0000',
+                        }}>
+                        {row.name}
+                      </p>
+                    </TableCell>
                     <TableCell
                       padding="checkbox"
                       component="th"
