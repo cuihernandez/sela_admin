@@ -23,7 +23,6 @@ import {
 } from 'firebase/firestore/lite';
 import {db} from '../../firebase';
 import {DatePicker} from '@mui/x-date-pickers';
-import classes from './data.module.css';
 
 const theme = createTheme({
   palette: {
@@ -225,7 +224,7 @@ const Data1 = () => {
                   }}>
                   <Button onClick={handleChange} variant="contained" fullWidth>
                     Confirm
-                    {loading.date && <RotateLeft className={classes.spinner} />}
+                    {loading.date && <RotateLeft className={'spinner'} />}
                   </Button>
                 </Box>
               </Box>
