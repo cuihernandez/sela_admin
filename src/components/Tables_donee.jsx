@@ -21,11 +21,22 @@ import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import Button from '@mui/material/Button';
 import EditImage from '../assets/Edit_btn_icon.png';
-import {collection, getDocs} from 'firebase/firestore/lite';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  writeBatch,
+} from 'firebase/firestore/lite';
 import {db} from '../firebase';
 import {useNavigate} from 'react-router-dom';
 import {useEditContext} from '../EditContext';
-import {RotateLeft} from '@mui/icons-material';
+import {
+  DeleteOutline,
+  Edit,
+  EditCalendar,
+  RotateLeft,
+} from '@mui/icons-material';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -63,12 +74,12 @@ const headCells = [
     label: '',
   },
 
-  // {
-  //   id: 'delete',
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: '',
-  // },
+  {
+    id: 'delete',
+    numeric: true,
+    disablePadding: false,
+    label: '',
+  },
 
   {
     id: 'credit',
@@ -157,7 +168,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const {numSelected} = props;
+  const {numSelected, deleteSelected} = props;
 
   return (
     <Toolbar
@@ -173,13 +184,28 @@ function EnhancedTableToolbar(props) {
         }),
       }}>
       {numSelected > 0 ? (
-        <Typography
-          sx={{flex: '1 1 100%'}}
-          color="inherit"
-          variant="subtitle1"
-          component="div">
-          {numSelected} selected
-        </Typography>
+        <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+          <Typography
+            sx={{flex: '1 1 100%'}}
+            color="inherit"
+            variant="subtitle1"
+            component="div">
+            {numSelected} selected
+          </Typography>
+          <IconButton
+            onClick={() => {
+              const result = prompt(
+                `Delete ${numSelected} transaction documents? enter "YES" to confirm`,
+              );
+
+              console.log({result});
+              if (result.toLowerCase() === 'yes') {
+                deleteSelected();
+              }
+            }}>
+            <DeleteOutline />
+          </IconButton>
+        </div>
       ) : (
         <Typography
           sx={{flex: '1 1 100%'}}
@@ -289,6 +315,7 @@ export default function EnhancedTable() {
 
         if (!group) {
           group = {
+            docId: doc.id,
             id: groupedTransactions.length,
             name: transaction.doneeName,
             email: transaction.doneeEmail,
@@ -315,12 +342,52 @@ export default function EnhancedTable() {
       setLoading(false);
     }
   };
+
+  const deleteOne = async itemId => {
+    try {
+      await deleteDoc(doc(db, 'transaction', itemId));
+      console.log('Document deleted successfully');
+      setRows(prev => prev.filter(row => row.docId !== itemId));
+      alert('Document deleted successfully');
+    } catch (error) {
+      console.error({error});
+    }
+  };
+
+  const deleteSelected = async () => {
+    try {
+      const batch = writeBatch(db);
+
+      console.log(
+        'SELECTED: ',
+        selected,
+        selected.map(selection => rows[selection].docId),
+      );
+
+      const docsToDelete = selected.map(selection => rows[selection].docId);
+
+      docsToDelete.forEach(docId => {
+        const docRef = doc(db, 'transaction', docId);
+        batch.delete(docRef);
+      });
+
+      await batch.commit();
+      console.log('Documents deleted successfully');
+      alert('Documents deleted successfully');
+      setRows(prev => prev.filter(row => !docsToDelete.includes(row.docId)));
+    } catch (error) {
+      alert('something went wrong');
+    }
+  };
+
   useEffect(() => {
     setVisibleRows(rows);
   }, [rows]);
+
   useEffect(() => {
     getTableData();
   }, []);
+
   useEffect(() => {
     console.log('Rows data is---', rows);
     const updatedVisibleRows = stableSort(
@@ -329,10 +396,18 @@ export default function EnhancedTable() {
     ).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
     setVisibleRows(updatedVisibleRows);
   }, [rows, order, orderBy, page, rowsPerPage]);
+
+  useEffect(() => {
+    console.log('VISIBLE_ROWS: ', visibleRows);
+  }, [visibleRows]);
+
   return (
     <Box sx={{width: '100%'}}>
       <Paper sx={{width: '100%', mb: 2}}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          deleteSelected={deleteSelected}
+        />
         <TableContainer>
           <Table
             sx={{minWidth: 750}}
@@ -379,13 +454,30 @@ export default function EnhancedTable() {
                           scope="row"
                           padding="none"
                           align="right">
-                          <Button onClick={() => handleDonorClick(row)}>
-                            <img
-                              src={EditImage}
-                              alt="edit"
-                              style={{width: 15, height: 15}}
-                            />
-                          </Button>
+                          <IconButton
+                            onClick={() => {
+                              const result = prompt(
+                                `Delete ${row.name} transaction document? enter "YES" to confirm`,
+                              );
+
+                              console.log({result});
+                              if (result.toLowerCase() === 'yes') {
+                                console.log({docID: row.docId});
+                                deleteOne(row?.docId);
+                              }
+                            }}>
+                            <DeleteOutline style={{fill: '#560FC9'}} />
+                          </IconButton>
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          padding="none"
+                          align="right">
+                          <IconButton onClick={() => handleDonorClick(row)}>
+                            <EditCalendar style={{fill: '#560FC9'}} />
+                          </IconButton>
                         </TableCell>
                         <TableCell align="right">{row.credit}</TableCell>
                         <TableCell align="right">{row.totalDonation}</TableCell>

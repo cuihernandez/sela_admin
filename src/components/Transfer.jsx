@@ -47,7 +47,7 @@ const Transfer = props => {
             <Box>
               <Box>
                 <Typography color="black" textAlign={'right'}>
-                  {props.name}
+                  {props.name}ihdiue
                 </Typography>
                 <Typography color="gray" textAlign={'right'}>
                   Transfer
