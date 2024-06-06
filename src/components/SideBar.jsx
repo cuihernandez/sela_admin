@@ -29,7 +29,7 @@ function RightAlignedContainer() {
             sx={{
               width: 80,
               height: 80,
-              marginTop: 2,
+              marginTop: 10,
             }}
             src={iconImage}
             alt="Icon Image"
@@ -38,11 +38,13 @@ function RightAlignedContainer() {
             sx={{
               display: 'flex',
               justifyContent: 'flex-end',
-              marginLeft: 12,
               marginTop: 6,
             }}>
             <List sx={{width: '100%'}}>
               <ListItem
+                style={{
+                  width: '100%',
+                }}
                 button
                 component={Link}
                 to="/tabledonor"
@@ -50,6 +52,9 @@ function RightAlignedContainer() {
                 <ListItemText primary="משתמשים" />
               </ListItem>
               <ListItem
+                style={{
+                  width: '100%',
+                }}
                 button
                 component={Link}
                 to="/tabledonee"
@@ -60,6 +65,9 @@ function RightAlignedContainer() {
                 <ListItemText primary="מערכת" />
               </ListItem>
               <ListItem
+                style={{
+                  width: '100%',
+                }}
                 button
                 component={Link}
                 to="/help-students"
