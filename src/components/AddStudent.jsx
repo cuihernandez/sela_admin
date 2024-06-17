@@ -3,7 +3,7 @@ import {useState} from 'react';
 import {db, storage} from '../firebase';
 import {addDoc, collection, serverTimestamp} from 'firebase/firestore/lite';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
-import {Camera} from '@mui/icons-material';
+import {Camera, RotateLeft} from '@mui/icons-material';
 
 const theme = createTheme({
   palette: {
@@ -20,6 +20,7 @@ export default function AddStudent() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [image, setImage] = useState({file: null, preview: null});
+  const [loading, setLoading] = useState(false);
 
   const addImage = ({preview, data}) => {
     console.log({preview, data});
@@ -47,6 +48,7 @@ export default function AddStudent() {
       return alert('Invalid Student details');
 
     try {
+      setLoading(true);
       // Reference to the collection
 
       const imageUrl = await uploadImage(image.file);
@@ -68,6 +70,8 @@ export default function AddStudent() {
       alert(`Student, ${name} added successfully`);
     } catch (e) {
       console.error('Error adding document: ', e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,6 +123,7 @@ export default function AddStudent() {
                 width: '100%',
                 height: '100%',
               }}
+              alt="preview"
             />
           )}
           <label
@@ -187,8 +192,9 @@ export default function AddStudent() {
             />
           </Box>
         </Box>
-        <Button type="submit" fullWidth variant="contained">
+        <Button type="submit" variant="contained" fullWidth>
           Save
+          {loading && <RotateLeft className={'spinner'} />}
         </Button>
       </form>
     </ThemeProvider>
