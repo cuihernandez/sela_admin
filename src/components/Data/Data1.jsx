@@ -20,6 +20,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  writeBatch,
 } from 'firebase/firestore/lite';
 import {db} from '../../firebase';
 import {DatePicker} from '@mui/x-date-pickers';
@@ -65,16 +66,18 @@ const Data1 = () => {
       if (docStartSnapshot.exists() && docEndSnapshot.exists()) {
         const startTime = dayjs(docStartSnapshot.data().time.toDate()); // Convert Firestore timestamp to dayjs
         const endTime = dayjs(docEndSnapshot.data().time.toDate()); // Convert Firestore timestamp to dayjs
+        console.log({startTime, endTime});
         setStartDate(startTime);
-        setEndDate(endDate);
-        console.log('startTime:', startTime, 'end time is', endTime);
+        setEndDate(endTime);
+        // console.log('startTime:', startTime, 'endTime is', endTime);
+        console.debug({startTime, endTime});
       } else {
         console.log('One or both documents do not exist.');
       }
     };
 
     fetchDateData();
-  }, [endDate]);
+  }, []);
 
   const onSubmit = async formData => {
     try {
@@ -115,6 +118,7 @@ const Data1 = () => {
       }
 
       alert('Date set successfully');
+      updateAllDocuments('students', 'inView', false);
     } catch (error) {
       console.error('error is :', error);
     } finally {
@@ -333,4 +337,26 @@ const Data1 = () => {
   );
 };
 
+const updateAllDocuments = async (
+  collectionName,
+  propertyName,
+  propertyValue,
+) => {
+  const batch = writeBatch(db);
+  const collectionRef = collection(db, collectionName);
+
+  try {
+    const snapshot = await getDocs(collectionRef);
+
+    snapshot.forEach(docSnapshot => {
+      const docRef = doc(db, collectionName, docSnapshot.id);
+      batch.update(docRef, {[propertyName]: propertyValue});
+    });
+
+    await batch.commit();
+    console.log('All documents updated successfully');
+  } catch (error) {
+    console.error('Error updating documents: ', error);
+  }
+};
 export default Data1;
