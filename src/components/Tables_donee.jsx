@@ -491,7 +491,9 @@ export default function EnhancedTable() {
                             <EditCalendar style={{fill: '#560FC9'}} />
                           </IconButton>
                         </TableCell>
-                        <TableCell align="right">{row.credit}</TableCell>
+                        <TableCell align="right">
+                          {row.credit?.toFixed()}
+                        </TableCell>
                         <TableCell align="right">{row.totalDonation}</TableCell>
                         <TableCell align="right">{row.email}</TableCell>
                         <TableCell align="right">{row.name}</TableCell>
