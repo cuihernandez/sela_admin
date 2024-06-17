@@ -316,13 +316,6 @@ export default function HelpStudents() {
         };
         groupedStudents.push(group);
       }
-
-      group.totalDonation += student.studentAmount;
-      group.credit++;
-    });
-
-    groupedStudents.forEach(group => {
-      group.credit = group.totalDonation - group.credit * 0.2;
     });
 
     setRows(groupedStudents);

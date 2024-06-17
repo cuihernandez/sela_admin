@@ -299,41 +299,132 @@ export default function EnhancedTable() {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
   const [visibleRows, setVisibleRows] = useState([]);
 
+  // const getTableData = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const transactionsRef = collection(db, 'transaction');
+  //     const userDataCollectionRef = collection(db, 'userData');
+  //     const snapshot = await getDocs(transactionsRef);
+
+  //     let groupedTransactions = [];
+  //     snapshot.forEach(doc => {
+  //       const transaction = doc.data();
+  //       const key = `${transaction.doneeName}_${transaction.doneeEmail}_${transaction.donorID}`;
+
+  //       // Find the existing group in the array
+  //       let group;
+  //       // let group = groupedTransactions.find(g => g.key === key);
+  //       // console.log('GROUP:', groupedTransactions);
+
+  //       let totalCount = 0;
+  //       getDocs(userDataCollectionRef)
+  //         .then(querySnapshot => {
+  //           querySnapshot.forEach(document => {
+  //             const userDocData = document.data();
+  //             if (
+  //               userDocData.patientsPrayedFor &&
+  //               Array.isArray(userDocData.patientsPrayedFor)
+  //             ) {
+  //               const itemCount = userDocData.patientsPrayedFor.filter(
+  //                 id => id === doc.id,
+  //               ).length;
+  //               totalCount += itemCount;
+  //             }
+  //           });
+  //         })
+  //         .catch(err => console.error('DEDUCTION: ', err));
+
+  //       console.log({totalCount});
+
+  //       if (!group) {
+  //         group = {
+  //           docId: doc.id,
+  //           id: groupedTransactions.length,
+  //           name: transaction.doneeName,
+  //           email: transaction.doneeEmail,
+  //           donorID: transaction.donorID,
+  //           totalDonation: 0,
+  //           credit: 0,
+  //           totalPrayers: totalCount,
+  //           key: key, // Store the key for identification
+  //         };
+
+  //         console.log('NO_GROUP:', group);
+  //         groupedTransactions.push(group);
+  //       }
+
+  //       group.totalDonation += transaction.transactionAmount;
+  //       console.log('THIS_RAN:', group);
+  //       // group.credit++;
+  //     });
+
+  //     groupedTransactions.forEach(group => {
+  //       console.log('CREDIT: ', group, group.credit, group.totalPrayers);
+  //       group.credit = group.totalDonation - group.totalPrayers * 0.2;
+  //     });
+
+  //     setRows(groupedTransactions);
+  //   } catch (error) {
+  //     console.error('GET_DONEE_DATA: ', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const getTableData = async () => {
     try {
       setLoading(true);
       const transactionsRef = collection(db, 'transaction');
+      const userDataCollectionRef = collection(db, 'userData');
       const snapshot = await getDocs(transactionsRef);
 
       let groupedTransactions = [];
-      snapshot.forEach(doc => {
-        const transaction = doc.data();
-        const key = `${transaction.doneeName}_${transaction.doneeEmail}_${transaction.donorID}`;
+      await Promise.all(
+        snapshot.docs.map(async doc => {
+          const transaction = doc.data();
+          const key = `${transaction.doneeName}_${transaction.doneeEmail}_${transaction.donorID}`;
 
-        // Find the existing group in the array
-        let group = groupedTransactions.find(g => g.key === key);
+          // Find the existing group in the array
+          let group;
+          let totalCount = 0;
 
-        if (!group) {
-          group = {
-            docId: doc.id,
-            id: groupedTransactions.length,
-            name: transaction.doneeName,
-            email: transaction.doneeEmail,
-            donorID: transaction.donorID,
-            totalDonation: 0,
-            credit: 0,
-            key: key, // Store the key for identification
-          };
-          groupedTransactions.push(group);
-        }
+          const querySnapshot = await getDocs(userDataCollectionRef);
+          querySnapshot.forEach(document => {
+            const userDocData = document.data();
+            if (
+              userDocData.patientsPrayedFor &&
+              Array.isArray(userDocData.patientsPrayedFor)
+            ) {
+              const itemCount = userDocData.patientsPrayedFor.filter(
+                id => id === doc.id,
+              ).length;
+              totalCount += itemCount;
+            }
+          });
 
-        group.totalDonation += transaction.transactionAmount;
-        group.credit++;
-      });
+          console.log({totalCount});
 
-      groupedTransactions.forEach(group => {
-        group.credit = group.totalDonation - group.credit * 0.2;
-      });
+          if (!group) {
+            group = {
+              docId: doc.id,
+              id: groupedTransactions.length,
+              name: transaction.doneeName,
+              email: transaction.doneeEmail,
+              donorID: transaction.donorID,
+              totalDonation: 0,
+              credit: 0,
+              totalPrayers: totalCount,
+              key: key, // Store the key for identification
+            };
+
+            groupedTransactions.push(group);
+          }
+
+          group.totalDonation += transaction.transactionAmount;
+
+          group.credit = group.totalDonation - group.totalPrayers * 0.2;
+        }),
+      );
 
       setRows(groupedTransactions);
     } catch (error) {
@@ -346,7 +437,6 @@ export default function EnhancedTable() {
   const deleteOne = async itemId => {
     try {
       await deleteDoc(doc(db, 'transaction', itemId));
-      console.log('Document deleted successfully');
       setRows(prev => prev.filter(row => row.docId !== itemId));
       alert('Document deleted successfully');
     } catch (error) {
@@ -372,7 +462,6 @@ export default function EnhancedTable() {
       });
 
       await batch.commit();
-      console.log('Documents deleted successfully');
       alert('Documents deleted successfully');
       setRows(prev => prev.filter(row => !docsToDelete.includes(row.docId)));
     } catch (error) {
@@ -389,7 +478,6 @@ export default function EnhancedTable() {
   }, []);
 
   useEffect(() => {
-    console.log('Rows data is---', rows);
     const updatedVisibleRows = stableSort(
       rows,
       getComparator(order, orderBy),
@@ -397,9 +485,7 @@ export default function EnhancedTable() {
     setVisibleRows(updatedVisibleRows);
   }, [rows, order, orderBy, page, rowsPerPage]);
 
-  useEffect(() => {
-    console.log('VISIBLE_ROWS: ', visibleRows);
-  }, [visibleRows]);
+  useEffect(() => {}, [visibleRows]);
 
   return (
     <Box sx={{width: '100%'}}>
@@ -460,9 +546,7 @@ export default function EnhancedTable() {
                                 `Delete ${row.name} transaction document? enter "YES" to confirm`,
                               );
 
-                              console.log({result});
                               if (result.toLowerCase() === 'yes') {
-                                console.log({docID: row.docId});
                                 deleteOne(row?.docId);
                               }
                             }}>
