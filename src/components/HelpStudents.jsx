@@ -18,14 +18,7 @@ import IconButton from '@mui/material/IconButton';
 import {visuallyHidden} from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  query,
-  where,
-} from 'firebase/firestore/lite';
+import {collection, getDocs, deleteDoc, doc} from 'firebase/firestore/lite';
 import {db} from '../firebase';
 import {Link} from 'react-router-dom';
 import {AddOutlined, DeleteOutlineOutlined} from '@mui/icons-material';
@@ -300,8 +293,7 @@ export default function HelpStudents() {
 
   const getTableData = async () => {
     const studentsRef = collection(db, 'students');
-    const q = query(studentsRef, where('sponsor', '==', ''));
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(studentsRef);
 
     let groupedStudents = [];
     snapshot.forEach(doc => {
@@ -319,6 +311,7 @@ export default function HelpStudents() {
           name: student.name,
           phone: student.phone,
           photo: student.photo,
+          sponsor: student.sponsor,
           key: key, // Store the key for identification
         };
         groupedStudents.push(group);
@@ -379,6 +372,13 @@ export default function HelpStudents() {
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
+                    style={{
+                      // opacity: row.sponsor ? 0.8 : 1,
+                      color: row.sponsor ? 'gray' : 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                    }}
                     key={row.id}
                     selected={isItemSelected}
                     sx={{cursor: 'pointer'}}>
@@ -431,6 +431,21 @@ export default function HelpStudents() {
                         }}
                       />
                     </TableCell>
+                    {row.sponsor && (
+                      <>
+                        <div
+                          style={{
+                            height: 2,
+                            width: '85%',
+                            top: '50%',
+                            left: 20,
+                            margin: 'auto',
+                            backgroundColor: 'lightgray',
+                            position: 'absolute',
+                          }}
+                        />
+                      </>
+                    )}
                   </TableRow>
                 );
               })}
