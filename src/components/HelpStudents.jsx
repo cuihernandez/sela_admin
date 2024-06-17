@@ -18,7 +18,14 @@ import IconButton from '@mui/material/IconButton';
 import {visuallyHidden} from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
-import {collection, getDocs, deleteDoc, doc} from 'firebase/firestore/lite';
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  where,
+} from 'firebase/firestore/lite';
 import {db} from '../firebase';
 import {Link} from 'react-router-dom';
 import {AddOutlined, DeleteOutlineOutlined} from '@mui/icons-material';
@@ -293,7 +300,8 @@ export default function HelpStudents() {
 
   const getTableData = async () => {
     const studentsRef = collection(db, 'students');
-    const snapshot = await getDocs(studentsRef);
+    const q = query(studentsRef, where('sponsor', '==', ''));
+    const snapshot = await getDocs(q);
 
     let groupedStudents = [];
     snapshot.forEach(doc => {
