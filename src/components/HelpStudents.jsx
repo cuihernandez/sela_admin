@@ -373,8 +373,8 @@ export default function HelpStudents() {
                     aria-checked={isItemSelected}
                     tabIndex={-1}
                     style={{
-                      // opacity: row.sponsor ? 0.8 : 1,
-                      color: row.sponsor ? 'gray' : 1,
+                      opacity: row.sponsor ? 0.6 : 1,
+                      backgroundColor: row.sponsor ? 'lightgray' : 1,
                       alignItems: 'center',
                       justifyContent: 'center',
                       position: 'relative',
@@ -431,7 +431,7 @@ export default function HelpStudents() {
                         }}
                       />
                     </TableCell>
-                    {row.sponsor && (
+                    {/* {row.sponsor && (
                       <>
                         <div
                           style={{
@@ -445,7 +445,7 @@ export default function HelpStudents() {
                           }}
                         />
                       </>
-                    )}
+                    )} */}
                   </TableRow>
                 );
               })}
