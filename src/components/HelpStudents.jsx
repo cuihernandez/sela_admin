@@ -311,6 +311,7 @@ export default function HelpStudents() {
           name: student.name,
           phone: student.phone,
           photo: student.photo,
+          sponsor: student.sponsor,
           key: key, // Store the key for identification
         };
         groupedStudents.push(group);
@@ -371,6 +372,13 @@ export default function HelpStudents() {
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
+                    style={{
+                      opacity: row.sponsor ? 0.6 : 1,
+                      backgroundColor: row.sponsor ? 'lightgray' : 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                    }}
                     key={row.id}
                     selected={isItemSelected}
                     sx={{cursor: 'pointer'}}>
@@ -423,6 +431,21 @@ export default function HelpStudents() {
                         }}
                       />
                     </TableCell>
+                    {/* {row.sponsor && (
+                      <>
+                        <div
+                          style={{
+                            height: 2,
+                            width: '85%',
+                            top: '50%',
+                            left: 20,
+                            margin: 'auto',
+                            backgroundColor: 'lightgray',
+                            position: 'absolute',
+                          }}
+                        />
+                      </>
+                    )} */}
                   </TableRow>
                 );
               })}
