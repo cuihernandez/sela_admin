@@ -1,7 +1,7 @@
 import {Box, Button, Input, ThemeProvider, createTheme} from '@mui/material';
 import {useState} from 'react';
 import {db, storage} from '../firebase';
-import {addDoc, collection} from 'firebase/firestore/lite';
+import {addDoc, collection, serverTimestamp} from 'firebase/firestore/lite';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {Camera} from '@mui/icons-material';
 
@@ -59,6 +59,7 @@ export default function AddStudent() {
         photo: imageUrl,
         inView: false,
         sponsor: '',
+        createdAt: serverTimestamp(),
       });
 
       console.log({docRef});
