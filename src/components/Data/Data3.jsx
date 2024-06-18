@@ -1,4 +1,4 @@
-import {React, useEffect, useState} from 'react';
+import {React, useCallback, useEffect, useState} from 'react';
 import Typography from '@mui/material/Typography';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -38,14 +38,16 @@ const getTransactionData = async donorID => {
 const Data3 = () => {
   const {editData} = useEditContext();
   const [transactionData, setTransactionData] = useState({});
-  const initialize = async () => {
-    const data = await getTransactionData(editData.donorID);
+  const initialize = useCallback(async () => {
+    const data = await getTransactionData(editData?.donorID);
     setTransactionData(data);
-  };
-  useEffect(() => {
-    initialize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
+
+  useEffect(() => {
+    console.log('EDIT_DATA: ', editData);
+    initialize();
+  }, [editData, initialize]);
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -83,14 +85,14 @@ const Data3 = () => {
                   border={1}
                   borderColor={'#D6B7FF'}
                   sx={{margin: 2, borderRadius: 3, padding: 1}}>
-                  {Array.isArray(transactionData) &&
+                  {/* {Array.isArray(transactionData) &&
                     transactionData.map(doc => (
                       <Transfer
                         key={doc.id}
                         price={doc.transactionAmount}
                         name={doc.doneeName}
                       />
-                    ))}
+                    ))} */}
                 </Box>
                 <Box
                   border={1}
@@ -113,7 +115,7 @@ const Data3 = () => {
                     color="primary"
                     fontWeight="bold"
                     textAlign={'right'}>
-                    ${editData.credit}
+                    {/* ${editData.credit} */}
                   </Typography>
                 </Box>
               </Card>
