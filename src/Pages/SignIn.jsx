@@ -54,7 +54,6 @@ export default function SignIn() {
       );
       const user = userCredential.user;
       localStorage.setItem('token', user.accessToken);
-      console.log('User signed in:', user.accessToken);
       if (localStorage.getItem('token') === user.accessToken) {
         window.location.href = '/tabledonor';
       }

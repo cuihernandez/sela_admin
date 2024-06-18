@@ -39,7 +39,6 @@ function getComparator(order, orderBy) {
 }
 
 function stableSort(array, comparator) {
-  console.log('INPUT_ARRAY: ', array);
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -49,7 +48,6 @@ function stableSort(array, comparator) {
     return a[1] - b[1];
   });
   const result = stabilizedThis.map(el => el[0]);
-  console.log({result});
   return result;
 }
 
@@ -328,14 +326,6 @@ export default function EnhancedTable() {
     dbLoad();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    console.log('ROWS: ', rows);
-  }, [rows]);
-
-  useEffect(() => {
-    console.log('VISIBLE_ROWS: ', visibleRows);
-  }, [visibleRows]);
 
   return (
     <Box sx={{width: '100%'}}>

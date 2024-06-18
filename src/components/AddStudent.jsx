@@ -23,7 +23,6 @@ export default function AddStudent() {
   const [loading, setLoading] = useState(false);
 
   const addImage = ({preview, data}) => {
-    console.log({preview, data});
     setImage({file: data, preview});
   };
 
@@ -55,7 +54,7 @@ export default function AddStudent() {
       const colRef = collection(db, 'students');
 
       // Add the document with auto-generated ID
-      const docRef = await addDoc(colRef, {
+      await addDoc(colRef, {
         name,
         phone,
         photo: imageUrl,
@@ -64,9 +63,6 @@ export default function AddStudent() {
         createdAt: serverTimestamp(),
       });
 
-      console.log({docRef});
-
-      // console.log(`Student, ${name} added successfully`);
       alert(`Student, ${name} added successfully`);
     } catch (e) {
       console.error('Error adding document: ', e);
@@ -83,12 +79,8 @@ export default function AddStudent() {
 
       // Upload the file
       const snapshot = await uploadBytes(storageRef, file);
-
-      console.log('Uploaded a blob or file!', snapshot);
-
       // Get the download URL
       const downloadURL = await getDownloadURL(snapshot.ref);
-      console.log('File available at', downloadURL);
 
       return downloadURL;
     } catch (e) {
@@ -156,16 +148,11 @@ export default function AddStudent() {
               const target = e.target;
               const value = target.files ? target.files[0] : null;
 
-              console.log('IMAGE_FILE', {value});
-
               // @ts-ignore TODO
               //TODO COMEBACK ADD_TYPES
               const img = Object.values(target.files)[0];
 
-              console.log({img});
-
               readURI(img, value);
-              console.log({value});
               return setImage(img);
             }}
           />
