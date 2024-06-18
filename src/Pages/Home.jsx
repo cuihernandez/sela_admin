@@ -15,7 +15,6 @@ function Home() {
   const navigate = useNavigate();
   useEffect(() => {
     const accessToken = localStorage.getItem('token');
-    console.log({accessToken});
     if (!accessToken) navigate('/signin');
   }, [navigate]);
 
@@ -46,12 +45,8 @@ function Home() {
                       <Route path="/edit" element={<Edit />} />
                       <Route path="/donors/:id" element={<Donors />} />
                       <Route path="/tabledonee" element={<TableDonee />} />
-                      <Route index path="/" element={<TablesDoner />} />
-                      <Route
-                        index
-                        path="/tabledonor"
-                        element={<TablesDoner />}
-                      />
+                      <Route path="/" element={<TablesDoner />} />
+                      <Route path="/tabledonor" element={<TablesDoner />} />
                       <Route path="/help-students" element={<HelpStudents />} />
                       <Route
                         path="/help-students/new"

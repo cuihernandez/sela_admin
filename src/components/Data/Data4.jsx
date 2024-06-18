@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from 'react';
+import {React, useState, useEffect, useCallback} from 'react';
 import Typography from '@mui/material/Typography';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -33,14 +33,14 @@ const getColumnData = async donorID => {
       // Use === for comparison
       documentData = doc.data();
     } else {
-      console.log('The data is not exist');
+      // NOTE: DO something
     }
   });
 
   if (documentData) {
-    console.log('Document data:', documentData);
+    // NOTE: DO something
   } else {
-    console.log('No document found with that ID.');
+    // NOTE: DO something
   }
   return documentData;
 };
@@ -50,10 +50,10 @@ const Data4 = () => {
   const [donorInfo, setDonorInfo] = useState({});
   const navigate = useNavigate();
 
-  const initialize = async () => {
+  const initialize = useCallback(async () => {
     const data = await getColumnData(editData.donorID);
     setDonorInfo(data);
-  };
+  }, [editData.donorID]);
 
   const handleFieldChange = field => e => {
     setDonorInfo(prev => ({...prev, [field]: e.target.value ?? ''}));
@@ -69,7 +69,7 @@ const Data4 = () => {
       await updateDoc(docRef1, {mothername: donorInfo.mothername});
       await updateDoc(docRef1, {email: donorInfo.email});
       await updateDoc(docRef1, {phone: donorInfo.phone});
-      console.log('Document updated successfully');
+      alert('Document updated successfully');
     } catch {}
   };
   const handleButtonClick = () => {
@@ -77,7 +77,7 @@ const Data4 = () => {
   };
   useEffect(() => {
     initialize();
-  }, [editData]);
+  }, [editData, initialize]);
   return (
     <>
       <ThemeProvider theme={theme}>

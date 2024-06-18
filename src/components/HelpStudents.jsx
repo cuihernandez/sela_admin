@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useLayoutEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import {alpha} from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -218,7 +218,6 @@ export default function HelpStudents() {
   const handleStudentDelete = async studentId => {
     // updateEditData(rowData);
     // navigate(`/donors/${rowData.id}`);
-    console.log({studentId, db});
 
     try {
       // Reference to the document
@@ -228,7 +227,6 @@ export default function HelpStudents() {
       // Delete the document
       await deleteDoc(docRef);
 
-      console.log('Document successfully deleted');
       getTableData();
     } catch (e) {
       console.error('Error deleting document: ', e);
@@ -299,7 +297,6 @@ export default function HelpStudents() {
     snapshot.forEach(doc => {
       const student = doc.data();
 
-      console.log({student});
       const key = `${student.name}_${student.phone}_${student.photo}`;
 
       // Find the existing group in the array
@@ -320,14 +317,16 @@ export default function HelpStudents() {
 
     setRows(groupedStudents);
   };
+
+  useLayoutEffect(() => {
+    getTableData();
+  }, []);
+
   useEffect(() => {
     setVisibleRows(rows);
   }, [rows]);
+
   useEffect(() => {
-    getTableData();
-  }, []);
-  useEffect(() => {
-    console.log('Rows data is---', rows);
     const updatedVisibleRows = stableSort(
       rows,
       getComparator(order, orderBy),
@@ -356,8 +355,6 @@ export default function HelpStudents() {
               {visibleRows.map((row, index) => {
                 const isItemSelected = isSelected(row.id);
                 const labelId = `enhanced-table-checkbox-${index}`;
-
-                console.log({row});
 
                 return (
                   <TableRow

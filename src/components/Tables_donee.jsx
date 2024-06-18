@@ -19,8 +19,6 @@ import IconButton from '@mui/material/IconButton';
 import {visuallyHidden} from '@mui/utils';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
-import Button from '@mui/material/Button';
-import EditImage from '../assets/Edit_btn_icon.png';
 import {
   collection,
   deleteDoc,
@@ -31,12 +29,7 @@ import {
 import {db} from '../firebase';
 import {useNavigate} from 'react-router-dom';
 import {useEditContext} from '../EditContext';
-import {
-  DeleteOutline,
-  Edit,
-  EditCalendar,
-  RotateLeft,
-} from '@mui/icons-material';
+import {DeleteOutline, EditCalendar, RotateLeft} from '@mui/icons-material';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -198,7 +191,6 @@ function EnhancedTableToolbar(props) {
                 `Delete ${numSelected} transaction documents? enter "YES" to confirm`,
               );
 
-              console.log({result});
               if (result.toLowerCase() === 'yes') {
                 deleteSelected();
               }
@@ -330,8 +322,6 @@ export default function EnhancedTable() {
             }
           });
 
-          console.log({totalCount});
-
           if (!group) {
             group = {
               docId: doc.id,
@@ -376,12 +366,6 @@ export default function EnhancedTable() {
     try {
       const batch = writeBatch(db);
 
-      console.log(
-        'SELECTED: ',
-        selected,
-        selected.map(selection => rows[selection].docId),
-      );
-
       const docsToDelete = selected.map(selection => rows[selection].docId);
 
       docsToDelete.forEach(docId => {
@@ -423,31 +407,33 @@ export default function EnhancedTable() {
           deleteSelected={deleteSelected}
         />
         <TableContainer>
-          <Table
-            sx={{minWidth: 750}}
-            aria-labelledby="tableTitle"
-            size={'medium'}>
-            <EnhancedTableHead
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {loading ? (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '4rem',
-                    width: '100%',
-                  }}>
-                  <RotateLeft className="spinner" sx={{fill: '#560FC9'}} />
-                </Box>
-              ) : (
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'start',
+                padding: '0 4rem',
+                height: '4rem',
+                width: '100%',
+              }}>
+              <RotateLeft className="spinner" sx={{fill: '#560FC9'}} />
+            </Box>
+          ) : (
+            <Table
+              sx={{minWidth: 750}}
+              aria-labelledby="tableTitle"
+              size={'medium'}>
+              <EnhancedTableHead
+                numSelected={selected.length}
+                order={order}
+                orderBy={orderBy}
+                onSelectAllClick={handleSelectAllClick}
+                onRequestSort={handleRequestSort}
+                rowCount={rows.length}
+              />
+
+              <TableBody>
                 <>
                   {visibleRows.map((row, index) => {
                     const isItemSelected = isSelected(row.id);
@@ -519,9 +505,9 @@ export default function EnhancedTable() {
                     </TableRow>
                   )}
                 </>
-              )}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
+          )}
         </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}

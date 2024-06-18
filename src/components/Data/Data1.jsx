@@ -66,11 +66,9 @@ const Data1 = () => {
       if (docStartSnapshot.exists() && docEndSnapshot.exists()) {
         const startTime = dayjs(docStartSnapshot.data().time.toDate()); // Convert Firestore timestamp to dayjs
         const endTime = dayjs(docEndSnapshot.data().time.toDate()); // Convert Firestore timestamp to dayjs
-        console.log({startTime, endTime});
         setStartDate(startTime);
         setEndDate(endTime);
         // console.log('startTime:', startTime, 'endTime is', endTime);
-        console.debug({startTime, endTime});
       } else {
         console.log('One or both documents do not exist.');
       }
@@ -84,12 +82,11 @@ const Data1 = () => {
       const docRef = await addDoc(collection(db, 'psalms'), {
         text: formData.newText, // Assuming you want to store text under "text" field
       });
-      console.log('Document written with ID: ', docRef.id);
       // Update local state with new item
       setItems(prev => [...prev, {id: docRef.id, text: formData.newText}]);
       reset(); // Reset form after submission
     } catch (e) {
-      console.error('Error adding document: ', e);
+      alert('Error adding document');
     }
   };
 
