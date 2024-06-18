@@ -478,7 +478,7 @@ export default function EnhancedTable() {
                           </IconButton>
                         </TableCell>
                         <TableCell align="right">
-                          {row.credit?.toFixed(2)}
+                          {row.credit >= 0.2 ? row.credit : 0}
                         </TableCell>
                         <TableCell align="right">{row.totalDonation}</TableCell>
                         <TableCell align="right">{row.email}</TableCell>
