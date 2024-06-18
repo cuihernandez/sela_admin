@@ -53,7 +53,8 @@ const Data4 = () => {
   const initialize = useCallback(async () => {
     const data = await getColumnData(editData.donorID);
     setDonorInfo(data);
-  }, [editData.donorID]);
+    console.log({editData});
+  }, [editData]);
 
   const handleFieldChange = field => e => {
     setDonorInfo(prev => ({...prev, [field]: e.target.value ?? ''}));
@@ -76,8 +77,9 @@ const Data4 = () => {
     updateUserData(editData.donorID);
   };
   useEffect(() => {
-    initialize();
+    if (editData) initialize();
   }, [editData, initialize]);
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -153,14 +155,14 @@ const Data4 = () => {
                 </Typography>
               </Card>
               <Box sx={{position: 'relative'}}>
-                <Box component="img" src={IconImage} />
-                <Button sx={{position: 'absolute', left: -20, bottom: 30}}>
+                <Box component="img" src={IconImage} width={200} height={200} />
+                {/* <Button sx={{position: 'absolute', left: -20, bottom: 30}}>
                   <img
                     src={EditImage}
                     alt="edit"
                     style={{width: 30, height: 30}}
                   />
-                </Button>
+                </Button> */}
               </Box>
             </Grid>
             <Grid>

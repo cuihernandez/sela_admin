@@ -311,13 +311,13 @@ const Data2 = () => {
                           // display: 'flex',
                           // justifyContent: 'flex-end',
                         }}>
-                        <Box sx={{}}>
+                        {/* <Box sx={{}}>
                           <img
                             src={QuoteImage}
                             alt="edit"
                             style={{width: 'auto', height: 'auto'}}
                           />
-                        </Box>
+                        </Box> */}
 
                         <Box>
                           <Box

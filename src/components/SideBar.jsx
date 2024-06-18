@@ -84,7 +84,7 @@ function RightAlignedContainer() {
 
 const ListItemStyle = {
   '&:hover': {
-    backgroundColor: 'linear-gradient(45deg, #F1E6FF, #F1E6FF)', // Change the background color on hover
+    // backgroundColor: 'linear-gradient(45deg, #F1E6FF, #F1E6FF)', // Change the background color on hover
   },
 };
 
