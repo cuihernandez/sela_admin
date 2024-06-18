@@ -492,7 +492,7 @@ export default function EnhancedTable() {
                           </IconButton>
                         </TableCell>
                         <TableCell align="right">
-                          {row.credit?.toFixed()}
+                          {row.credit?.toFixed(2)}
                         </TableCell>
                         <TableCell align="right">{row.totalDonation}</TableCell>
                         <TableCell align="right">{row.email}</TableCell>
