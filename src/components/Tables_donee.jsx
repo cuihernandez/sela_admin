@@ -478,7 +478,10 @@ export default function EnhancedTable() {
                           </IconButton>
                         </TableCell>
                         <TableCell align="right">
-                          {(row.credit >= 0.2 ? row.credit : 0).toFixed(2)}
+                          {(row.credit.toFixed(2) >= 0.2
+                            ? row.credit
+                            : 0
+                          ).toFixed(2)}
                         </TableCell>
                         <TableCell align="right">{row.totalDonation}</TableCell>
                         <TableCell align="right">{row.email}</TableCell>
