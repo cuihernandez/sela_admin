@@ -24,7 +24,9 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  query,
   writeBatch,
+  orderBy as OrderBy,
 } from 'firebase/firestore/lite';
 import {db} from '../firebase';
 import {useNavigate} from 'react-router-dom';
@@ -296,6 +298,9 @@ export default function EnhancedTable() {
       setLoading(true);
       const transactionsRef = collection(db, 'transaction');
       const userDataCollectionRef = collection(db, 'userData');
+
+      const q = query(userDataCollectionRef, OrderBy('createdAt', 'asc'));
+
       const snapshot = await getDocs(transactionsRef);
 
       let groupedTransactions = [];
@@ -308,7 +313,7 @@ export default function EnhancedTable() {
           let group;
           let totalCount = 0;
 
-          const querySnapshot = await getDocs(userDataCollectionRef);
+          const querySnapshot = await getDocs(q);
           querySnapshot.forEach(document => {
             const userDocData = document.data();
             if (
