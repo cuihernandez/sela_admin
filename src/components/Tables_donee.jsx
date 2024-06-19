@@ -299,7 +299,7 @@ export default function EnhancedTable() {
       const transactionsRef = collection(db, 'transaction');
       const userDataCollectionRef = collection(db, 'userData');
 
-      const q = query(userDataCollectionRef, OrderBy('createdAt', 'asc'));
+      const q = query(userDataCollectionRef, OrderBy('updatedAt', 'asc'));
 
       const snapshot = await getDocs(transactionsRef);
 
@@ -334,8 +334,8 @@ export default function EnhancedTable() {
               name: transaction.doneeName,
               email: transaction.doneeEmail,
               donorID: transaction.donorID,
-              totalDonation: 0,
-              credit: 0,
+              totalDonation: transaction.totalDonation,
+              credit: transaction.credit,
               totalPrayers: totalCount,
               key: key, // Store the key for identification
             };
@@ -343,9 +343,10 @@ export default function EnhancedTable() {
             groupedTransactions.push(group);
           }
 
-          group.totalDonation += transaction.transactionAmount;
+          // group.totalDonation += transaction.transactionAmount;
 
-          group.credit = group.totalDonation - group.totalPrayers * 0.2;
+          // group.credit = group.totalDonation - group.totalPrayers * 0.2;
+          console.log('CREDIT: ', group.credit, group.totalPrayers);
         }),
       );
 
