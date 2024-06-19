@@ -2,6 +2,7 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import SignIn from './Pages/SignIn';
 import Home from './Pages/Home';
 import DeleteAccount from './Pages/DeleteAccount';
+
 function App() {
   return (
     <BrowserRouter>
